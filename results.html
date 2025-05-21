@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBin - Результаты</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        .json-container {
+            flex: 1;
+            max-width: 50%;
+        }
+        .table-container {
+            flex: 1;
+            max-width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+            color: #212529;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover {
+            background-color: #3a56d4;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        #loading {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 18px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        #result {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 14px;
+            display: none;
+            height: calc(100vh - 130px);
+            overflow: auto;
+        }
+        #table-view {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: none;
+            flex: 1;
+            overflow: auto;
+        }
+        #error {
+            color: #dc3545;
+            padding: 20px;
+            background-color: #f8d7da;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            font-weight: 500;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        tr:hover {
+            background-color: #f1f3f9;
+        }
+        /* Анимация для загрузки */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        #loading {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        /* Стиль для успешного сообщения */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+            font-weight: 500;
+        }
+        /* Стили для переключателя таблиц */
+        .table-toggle {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .table-toggle-option {
+            padding: 8px 16px;
+            background-color: #f1f3f9;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .table-toggle-option:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+        .table-toggle-option:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+        .table-toggle-option.active {
+            background-color: #4361ee;
+            color: white;
+            border-color: #4361ee;
+        }
+        #stats-table {
+            display: none;
+        }
+        #campaigns-table {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Загрузка данных...</div>
+    
+    <div class="container">
+        <div class="json-container">
+            <div class="section-header">
+                <h2 class="section-title">RAW JSON</h2>
+            </div>
+            <pre id="result"></pre>
+        </div>
+        
+        <div class="table-container">
+            <div class="section-header">
+                <h2 class="section-title" id="table-title">Таблица данных</h2>
+                <div class="action-buttons">
+                    <button id="copy-btn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                        </svg>
+                        Копировать
+                    </button>
+                    <button id="excel-btn" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5v2zM3 12v-2h2v2H3zm0 1h2v2H4a1 1 0 0 1-1-1v-1zm3 2v-2h3v2H6zm4 0v-2h3v1a1 1 0 0 1-1 1h-2zm3-3h-3v-2h3v2zm-7 0v-2h3v2H6z"/>
+                        </svg>
+                        Экспорт в Excel
+                    </button>
+                </div>
+            </div>
+            <div id="table-view">
+                <!-- Таблица кампаний -->
+                <div id="campaigns-table">
+                    <table id="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название кампании</th>
+                                <th>Артикул</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Здесь будут данные таблицы кампаний -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Таблица статистики -->
+                <div id="stats-table">
+                    <table id="stats-data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Кампании</th>
+                                <th>Артикулы</th>
+                                <th>Показы</th>
+                                <th>Клики</th>
+                                <th>CTR (%)</th>
+                                <th>CPC</th>
+                                <th>CR (%)</th>
+                                <th>Корзины</th>
+                                <th>Заказы</th>
+                                <th>Затраты</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table-body">
+                            <!-- Здесь будут данные таблицы статистики -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="error"></div>
+    <div id="success-message" class="success-message"></div>
+
+    <script src="results.js"></script>
+</body>
+</html> 

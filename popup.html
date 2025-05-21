@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="48.png" alt="WBin Logo" class="logo-img">
+            <span class="logo-text">wbin<span class="version">v1.2</span></span>
+        </div>
+        <a href="https://github.com/Zaruber/-WB-ADS-Viewer" target="_blank" class="github-link">
+            <img src="github-logo.svg" alt="GitHub" class="github-icon">
+        </a>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="campaigns">парсинг рк</button>
+        <button class="tab-btn" data-tab="statistics">парсинг статистики</button>
+    </div>
+
+    <div class="tab-content" id="campaigns-content">
+        <div class="instruction-box">
+            <p class="instruction-title">РК Артикулы:</p>
+            <p><a href="https://cmp.wildberries.ru/campaigns/list/" target="_blank">Перейдите в свои кампании</a></p>
+            <p>В адресной строке браузера замените значение pageSize на максимальное, это 99</p>
+            <p>Должно получится<br>pageSize=99</p>
+            <p>Нажмите Enter, страница обновится, откройте расширение, нажмите кнопку отчет, откроется новая вкладка с данными по вашим артикулам в рекламных кампаниях.</p>
+        </div>
+    </div>
+
+    <div class="tab-content" id="statistics-content" style="display: none;">
+        <div class="instruction-box">
+            <p class="instruction-title">РК Статистика:</p>
+            <p><a href="https://cmp.wildberries.ru/campaigns/statistics/" target="_blank">Перейдите в статистику</a></p>
+            <p>В адресной строке браузера замените значение pageSize на максимальное, это 50</p>
+            <p>Должно получится<br>pageSize=50</p>
+            <p>Нажмите Enter, страница обновится, откройте расширение, нажмите кнопку отчет, откроется новая вкладка с данными статистики по вашим рекламным кампаниям.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button id="report-btn" class="report-btn">ОТЧЁТ</button>
+        <a href="https://t.me/real_zaruber" target="_blank" class="author-link">zaruber</a>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html> 

@@ -1,0 +1,54 @@
+{
+    "httpStatus": 200,
+    "error": "",
+    "code": 0,
+    "counts": {
+      "totalCount": 31,
+      "pauseCount": 28
+    },
+    "content": [
+      {
+        "id": 25649134,
+        "type": 9,
+        "statusId": 11,
+        "imagePath": "",
+        "categoryUid": "66666666-6666-6666-6666-666666666666",
+        "categoryName": "Объединённая",
+        "campaignId": 26202192,
+        "campaignName": "15880698 / 555/15 / поиск / jvo",
+        "brandName": "",
+        "startDate": "2025-05-20T11:49:02.84586+03:00",
+        "finishDate": null,
+        "position": null,
+        "predictedStartDate": null,
+        "predictedEndDate": null,
+        "carouselCard": [],
+        "products": [
+          {
+            "nm": 15880698,
+            "name": "",
+            "subject": {
+              "id": 0,
+              "name": ""
+            },
+            "brand": {
+              "id": 0,
+              "name": ""
+            },
+            "kind": {
+              "id": 0,
+              "name": ""
+            }
+          }
+        ],
+        "totalCount": 0,
+        "createDate": "2025-05-20T11:49:02.84586+03:00",
+        "changeDate": "2025-05-21T20:52:17.336377+03:00",
+        "urlType": 512,
+        "url": "",
+        "disableDate": null,
+        "promoSetId": null,
+        "paymentModel": "cpm"
+      }
+    ]
+  }

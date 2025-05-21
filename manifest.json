@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "WBin",
+  "version": "1.2",
+  "description": "Показывает RAW данные API v5 вместо v6",
+  "icons": {
+    "16": "16.png",
+    "32": "32.png",
+    "48": "48.png",
+    "128": "128.png"
+  },
+  "permissions": [
+    "webRequest",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://cmp.wildberries.ru/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://cmp.wildberries.ru/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_title": "WBin - Получить данные API",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "16.png",
+      "32": "32.png",
+      "48": "48.png",
+      "128": "128.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["results.html", "results.js", "popup.css", "popup.js", "github-logo.svg"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+} 
