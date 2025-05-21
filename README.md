@@ -1,3 +1,5 @@
+<img src="screen.png" alt="Скриншот расширения" width="800">
+
 # WBin
 
 Простое расширение для Google Chrome, которое позволяет просматривать данные API v5 вместо v6 на сайте Wildberries.
