@@ -6,48 +6,222 @@
     <title>WBin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <img src="48.png" alt="WBin Logo" class="logo-img">
-            <span class="logo-text">wbin<span class="version">v1.2</span></span>
+    <div class="container">
+        <div class="header">
+            <div class="app-info">
+                <div class="app-icon">
+                    <img src="48.png" alt="WBin">
+                </div>
+                <div class="app-details">
+                    <h1 class="app-name">WBin</h1>
+                    <span class="app-version">v1.3</span>
+                </div>
+            </div>
+            <a href="https://github.com/Zaruber/wbin" target="_blank" class="github-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+            </a>
         </div>
-        <a href="https://github.com/Zaruber/wbin" target="_blank" class="github-link">
-            <img src="github-logo.svg" alt="GitHub" class="github-icon">
-        </a>
-    </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="campaigns">парсинг рк</button>
-        <button class="tab-btn" data-tab="statistics">парсинг статистики</button>
-    </div>
-
-    <div class="tab-content" id="campaigns-content">
-        <div class="instruction-box">
-            <p class="instruction-title">РК Артикулы:</p>
-            <p><a href="https://cmp.wildberries.ru/campaigns/list/" target="_blank">Перейдите в свои кампании</a></p>
-            <p>В адресной строке браузера замените значение pageSize на максимальное, это 99</p>
-            <p>Должно получится<br>pageSize=99</p>
-            <p>Нажмите Enter, страница обновится, откройте расширение, нажмите кнопку отчет, откроется новая вкладка с данными по вашим артикулам в рекламных кампаниях.</p>
+        <div class="navigation">
+            <button class="nav-item active" data-tab="campaigns">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                </svg>
+                <span>Кампании</span>
+            </button>
+            <button class="nav-item" data-tab="statistics">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                </svg>
+                <span>Статистика</span>
+            </button>
+            <button class="nav-item" data-tab="ask">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>АСК</span>
+            </button>
         </div>
-    </div>
 
-    <div class="tab-content" id="statistics-content" style="display: none;">
-        <div class="instruction-box">
-            <p class="instruction-title">РК Статистика:</p>
-            <p><a href="https://cmp.wildberries.ru/campaigns/statistics/" target="_blank">Перейдите в статистику</a></p>
-            <p>В адресной строке браузера замените значение pageSize на максимальное, это 50</p>
-            <p>Должно получится<br>pageSize=50</p>
-            <p>Нажмите Enter, страница обновится, откройте расширение, нажмите кнопку отчет, откроется новая вкладка с данными статистики по вашим рекламным кампаниям.</p>
+        <div class="content" id="campaigns-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Парсинг кампаний</h2>
+                    <p>Извлечение данных о рекламных кампаниях и артикулах</p>
+                </div>
+                <div class="card-body">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <p>Перейдите в <a href="https://cmp.wildberries.ru/campaigns/list/" target="_blank">свои кампании</a></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <p>Установите <code>pageSize=99</code> в URL для максимального количества записей</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <p>Нажмите кнопку "Получить отчёт" после загрузки страницы</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button id="campaigns-report-btn" class="btn btn-primary">Получить отчёт</button>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="footer">
-        <button id="report-btn" class="report-btn">ОТЧЁТ</button>
-        <a href="https://t.me/real_zaruber" target="_blank" class="author-link">zaruber</a>
+        <div class="content" id="statistics-content" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Парсинг статистики</h2>
+                    <p>Анализ эффективности рекламных кампаний</p>
+                </div>
+                <div class="card-body">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <p>Перейдите в <a href="https://cmp.wildberries.ru/campaigns/statistics/" target="_blank">статистику кампаний</a></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <p>Установите <code>pageSize=50</code> в URL для полного списка</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <p>Нажмите кнопку "Получить отчёт" для анализа данных</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button id="statistics-report-btn" class="btn btn-primary">Получить отчёт</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="ask-content" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Анализ АСК</h2>
+                    <p>Детальный анализ ассоциированных конверсий</p>
+                </div>
+                <div class="card-body">
+                    <div class="info-banner">
+                        Необходима авторизация в <a href="https://cmp.wildberries.ru/" target="_blank">ЛК Wildberries</a>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="askAdvertId">ID рекламы</label>
+                        <input type="text" id="askAdvertId" placeholder="Например: 25033325" class="form-input">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="askDateFrom">Дата с</label>
+                            <input type="date" id="askDateFrom" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="askDateTo">Дата по</label>
+                            <input type="date" id="askDateTo" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button id="askAuthWb" class="btn btn-secondary">Авторизация WB</button>
+                        <button id="askFetchData" class="btn btn-primary">Получить данные</button>
+                    </div>
+                    
+                    <div id="askError" class="error-message"></div>
+                </div>
+            </div>
+            
+            <div id="askResults" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Результаты анализа</h3>
+                        <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Корзины (РК)</th>
+                                        <th>Ас. Конверсии, руб</th>
+                                        <th>Ас. Корзины, шт</th>
+                                        <th>Ас. Заказы, шт</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="askAtbs">-</td>
+                                        <td id="askAssociatedPrice">-</td>
+                                        <td id="askAssociatedAtbs">-</td>
+                                        <td id="askAssociatedOrders">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="actions">
+                            <button id="askCopyData" class="btn btn-secondary">Копировать данные</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="askAssociatedDetails" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Детализация ассоциированных конверсий</h4>
+                            <div id="askCopyDetailsSuccess" class="success-message">Таблица скопирована в буфер обмена!</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Артикул</th>
+                                            <th>Корзины</th>
+                                            <th>Заказы</th>
+                                            <th>Сумма, руб</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="askAssociatedDetailsBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="actions">
+                                <button id="askCopyDetailsData" class="btn btn-secondary">Копировать таблицу</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="askToggleRaw" class="btn btn-ghost">Показать сырые данные</button>
+            </div>
+            
+            <div id="askRawData" class="raw-data"></div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-info">
+                <span>Создано</span>
+                <a href="https://t.me/real_zaruber" target="_blank" class="author-link">@zaruber</a>
+            </div>
+        </div>
     </div>
 
     <script src="popup.js"></script>

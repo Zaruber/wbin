@@ -9,15 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Montserrat', 'Inter', 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f8f9fa;
-            color: #343a40;
+            background: linear-gradient(180deg, #fbfbfd 0%, #ffffff 100%);
+            color: #111827;
         }
         .container {
             display: flex;
-            gap: 30px;
+            gap: 24px;
             max-width: 1800px;
             margin: 0 auto;
         }
@@ -35,108 +35,56 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 14px;
         }
         .section-title {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
             margin: 0;
-            color: #212529;
+            color: #0b0b0f;
         }
         .action-buttons {
             display: flex;
             gap: 10px;
         }
         .btn {
-            background-color: #4361ee;
+            background-color: #0a84ff;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-family: 'Montserrat', sans-serif;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-family: inherit;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
             display: flex;
             align-items: center;
             gap: 6px;
+            box-shadow: 0 6px 12px rgba(10,132,255,0.18);
         }
         .btn:hover {
-            background-color: #3a56d4;
+            background-color: #0974e0;
+            transform: translateY(-0.5px);
         }
         .btn:active {
             transform: scale(0.98);
         }
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-        #loading {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 18px;
-            color: #6c757d;
-            font-weight: 500;
-        }
-        #result {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: monospace;
-            font-size: 14px;
-            display: none;
-            height: calc(100vh - 130px);
-            overflow: auto;
-        }
-        #table-view {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: none;
-            flex: 1;
-            overflow: auto;
-        }
-        #error {
-            color: #dc3545;
-            padding: 20px;
-            background-color: #f8d7da;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
-            font-weight: 500;
-        }
+        .btn-secondary { background-color: #f5f5f7; color: #111827; border: 1px solid rgba(60,60,67,0.12); box-shadow: none; }
+        .btn-secondary:hover { background-color: #ececf1; }
+        #loading { text-align: center; margin-top: 50px; font-size: 16px; color: #6b7280; font-weight: 600; }
+        #result { background-color: white; padding: 18px; border-radius: 12px; box-shadow: 0 6px 18px rgba(17,17,17,0.06); white-space: pre-wrap; word-wrap: break-word; font-family: monospace; font-size: 14px; display: none; height: calc(100vh - 130px); overflow: auto; }
+        #table-view { background-color: white; padding: 18px; border-radius: 12px; box-shadow: 0 6px 18px rgba(17,17,17,0.06); display: none; flex: 1; overflow: auto; }
+        #error { color: white; background: #ff3b30; padding: 20px; border-radius: 12px; margin-top: 20px; display: none; font-weight: 500; box-shadow: 0 6px 14px rgba(255,59,48,0.2); }
         table {
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
             font-size: 14px;
         }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-        th {
-            background-color: #f8f9fa;
-            color: #495057;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-        tr:hover {
-            background-color: #f1f3f9;
-        }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f5f5f7; color: #111827; font-weight: 700; position: sticky; top: 0; z-index: 1; letter-spacing: 0.5px; text-transform: uppercase; font-size: 12px; }
+        tr:hover { background-color: #f5f5f7; }
         /* Анимация для загрузки */
         @keyframes pulse {
             0% { opacity: 0.6; }
@@ -147,19 +95,7 @@
             animation: pulse 1.5s infinite ease-in-out;
         }
         /* Стиль для успешного сообщения */
-        .success-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #28a745;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: none;
-            z-index: 1000;
-            font-weight: 500;
-        }
+        .success-message { position: fixed; top: 20px; right: 20px; background-color: #34c759; color: white; padding: 12px 18px; border-radius: 12px; box-shadow: 0 6px 14px rgba(52,199,89,0.24); display: none; z-index: 1000; font-weight: 600; }
         /* Стили для переключателя таблиц */
         .table-toggle {
             display: flex;
@@ -184,12 +120,8 @@
             color: white;
             border-color: #4361ee;
         }
-        #stats-table {
-            display: none;
-        }
-        #campaigns-table {
-            display: none;
-        }
+        #stats-table { display: none; }
+        #campaigns-table { display: none; }
     </style>
 </head>
 <body>
