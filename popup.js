@@ -186,17 +186,18 @@ function askCopyPerCampaignSummaryToClipboard() {
     }
 
     const rows = [];
-    rows.push('ID РК\tКорзины (РК)\tАс. Конверсии, руб\tАс. Корзины, шт\tАс. Заказы, шт');
+    rows.push('ID Кампании\tКорзины (Базовые)\tЗаказы (Базовые)\tКорзины (Ас.К)\tЗаказы, шт (Ас.К)\tЗаказы, руб (Ас.К)');
     for (const tr of tbody.children) {
         const tds = tr.children;
-        if (tds.length >= 5) {
+        if (tds.length >= 6) {
             const id = tds[0].textContent.trim();
-            const atbs = tds[1].textContent.trim();
-            const priceRaw = tds[2].textContent.trim();
-            const price = priceRaw.replace(/[^\d\-,.]/g, '');
+            const baseAtbs = tds[1].textContent.trim();
+            const baseGoods = tds[2].textContent.trim();
             const assocAtbs = tds[3].textContent.trim();
-            const assocOrders = tds[4].textContent.trim();
-            rows.push(`${id}\t${atbs}\t${price}\t${assocAtbs}\t${assocOrders}`);
+            const assocGoods = tds[4].textContent.trim();
+            const assocPriceRaw = tds[5].textContent.trim();
+            const assocPrice = assocPriceRaw.replace(/[^\d\-,.]/g, '');
+            rows.push(`${id}\t${baseAtbs}\t${baseGoods}\t${assocAtbs}\t${assocGoods}\t${assocPrice}`);
         }
     }
 
@@ -238,16 +239,17 @@ function askShowCopyDetailsSuccess() {
 
 // Функция для копирования результатов АСК в буфер обмена
 function askCopyResultsToClipboard() {
-    const atbsValue = document.getElementById('askAtbs').textContent;
-    const associatedPriceValue = document.getElementById('askAssociatedPrice').textContent;
+    const atbsBaseValue = document.getElementById('askAtbsBase').textContent;
+    const ordersBaseValue = document.getElementById('askOrdersBase').textContent;
     const associatedAtbsValue = document.getElementById('askAssociatedAtbs').textContent;
-    const associatedOrdersValue = document.getElementById('askAssociatedOrders').textContent;
+    const associatedGoodsValue = document.getElementById('askAssociatedGoods').textContent;
+    const associatedPriceValue = document.getElementById('askAssociatedPrice').textContent;
     
     // Убираем знак валюты и другие символы форматирования
     const cleanPrice = associatedPriceValue.replace(/[^\d\-,.]/g, '');
     
     // Форматируем данные в формате для вставки в таблицу (TSV - Tab Separated Values)
-    const dataToCopy = `${atbsValue}\t${cleanPrice}\t${associatedAtbsValue}\t${associatedOrdersValue}`;
+    const dataToCopy = `${atbsBaseValue}\t${ordersBaseValue}\t${associatedAtbsValue}\t${associatedGoodsValue}\t${cleanPrice}`;
     
     // Копируем в буфер обмена
     navigator.clipboard.writeText(dataToCopy)
@@ -452,22 +454,34 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                 });
             }
 
-            // Подсчет итогов по данному ID
+            // Подсчет итогов по данному ID (базовые и ассоциированные) с валидациями как в одиночном режиме
             let atbsNm = 0;
+            let goodsNm = 0;
             if (Array.isArray(unified.content.nmStats)) {
-                unified.content.nmStats.forEach((it) => { atbsNm += (it.atbs || 0); });
+                unified.content.nmStats.forEach((it) => {
+                    atbsNm += (it.atbs || 0);
+                    goodsNm += (it.shks || 0);
+                });
             }
-            let assocAtbs = 0, assocOrders = 0, assocPrice = 0;
+            let assocAtbs = 0, assocGoods = 0, assocPrice = 0;
             if (Array.isArray(unified.content.sideNmStats)) {
                 unified.content.sideNmStats.forEach((it) => {
                     assocAtbs += (it.atbs || 0);
-                    assocOrders += (it.orders || 0);
+                    assocGoods += (it.shks || 0);
                     assocPrice += (it.sum_price || 0);
                 });
             }
-            perCampaign.push({ id, atbsNm, assocPrice, assocAtbs, assocOrders });
+            // Мини-лог сверки (как в одиночном):
+            console.log('Итоги по РК', id, {
+                base_atbs: atbsNm,
+                base_goods: goodsNm,
+                assoc_atbs: assocAtbs,
+                assoc_goods: assocGoods,
+                assoc_price: assocPrice
+            });
+            perCampaign.push({ id, atbsNm, goodsNm, assocAtbs, assocGoods, assocPrice });
             askProgressState.success += 1;
-            askProgressLog(`ID ${id}: успех (корзины=${atbsNm}, ас.руб=${assocPrice})`, 'success');
+            askProgressLog(`ID ${id}: успех (корзины=${atbsNm}, ас.товары=${assocGoods}, ас.руб=${assocPrice})`, 'success');
 
             // Пауза между запросами, чтобы сгладить всплески (и снизить шанс 429)
             if (i < idList.length - 1) {
@@ -506,9 +520,10 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                     tr.innerHTML = `
                         <td>${row.id}</td>
                         <td>${row.atbsNm}</td>
-                        <td>${new Intl.NumberFormat('ru-RU').format(row.assocPrice)}</td>
+                        <td>${row.goodsNm}</td>
                         <td>${row.assocAtbs}</td>
-                        <td>${row.assocOrders}</td>
+                        <td>${row.assocGoods}</td>
+                        <td>${new Intl.NumberFormat('ru-RU').format(row.assocPrice)}</td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -587,8 +602,9 @@ function askProcessData(data) {
     // Получение общей суммы заказов
     const totalSumPrice = content.sum_price || 0;
     
-    // Подсчет суммы atbs ТОЛЬКО из элементов массива nmStats
-    let totalAtbsNmStats = 0;
+    // Базовые метрики из nmStats (РК)
+    let totalAtbsNmStats = 0; // базовые корзины
+    let totalOrdersNmStats = 0; // базовые товары (шт)
     let nmStatsSumPrice = 0;
     
     // Сумма atbs ТОЛЬКО из nmStats
@@ -596,7 +612,8 @@ function askProcessData(data) {
         console.log('nmStats:', content.nmStats);
         content.nmStats.forEach(item => {
             totalAtbsNmStats += (item.atbs || 0);
-            console.log('Артикул:', item.nm_id, 'atbs:', item.atbs);
+            totalOrdersNmStats += (item.shks || 0);
+            console.log('Артикул:', item.nm_id, 'atbs:', item.atbs, 'shks:', item.shks);
         });
         
         // Для ассоциированных конверсий берем sum_price первого элемента nmStats
@@ -606,15 +623,16 @@ function askProcessData(data) {
     }
     
     // Подсчет ассоциированных корзин, заказов и суммы из sideNmStats
-    let associatedAtbs = 0;
-    let associatedOrders = 0;
-    let associatedPrice = 0; // Теперь считаем из ассоциированных конверсий
+    let associatedAtbs = 0;      // корзины (Ас.К)
+    let associatedGoods = 0;     // товары, шт (Ас.К)
+    let associatedPrice = 0;     // сумма
     
     if (content.sideNmStats && content.sideNmStats.length > 0) {
         console.log('sideNmStats (ассоциированные конверсии):', content.sideNmStats);
         content.sideNmStats.forEach(item => {
             associatedAtbs += (item.atbs || 0);
-            associatedOrders += (item.orders || 0);
+            // Товары (шт) в API — shks
+            associatedGoods += (item.shks || 0);
             associatedPrice += (item.sum_price || 0); // Суммируем цены ассоциированных товаров
             console.log('Ассоциированный артикул:', item.nm_id, 'atbs:', item.atbs, 'orders:', item.orders, 'sum_price:', item.sum_price);
         });
@@ -628,17 +646,22 @@ function askProcessData(data) {
         nmStatsSumPrice,
         associatedPrice, // Теперь это сумма из sideNmStats
         associatedAtbs,
-        associatedOrders,
+        associatedGoods,
         nmStatsLength: content.nmStats ? content.nmStats.length : 0,
         sideNmStatsLength: content.sideNmStats ? content.sideNmStats.length : 0
     });
     
-    // Отображение результатов в таблице
-    document.getElementById('askAtbs').textContent = totalAtbsNmStats;
-    document.getElementById('askAssociatedPrice').textContent = 
-        new Intl.NumberFormat('ru-RU').format(associatedPrice);
-    document.getElementById('askAssociatedAtbs').textContent = associatedAtbs;
-    document.getElementById('askAssociatedOrders').textContent = associatedOrders;
+    // Отображение результатов в таблице (с защитой на отсутствие элементов)
+    const fmt = new Intl.NumberFormat('ru-RU');
+    const askSetText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = String(value);
+    };
+    askSetText('askAtbsBase', totalAtbsNmStats);
+    askSetText('askOrdersBase', totalOrdersNmStats);
+    askSetText('askAssociatedAtbs', associatedAtbs);
+    askSetText('askAssociatedGoods', associatedGoods);
+    askSetText('askAssociatedPrice', fmt.format(associatedPrice));
     
     // Заполнение детализированной таблицы ассоциированных конверсий
     askPopulateAssociatedDetailsTable(content.sideNmStats || []);
@@ -775,23 +798,24 @@ function askCopyDetailsTableToClipboard() {
     let tableData = [];
     
     // Добавляем заголовки
-    tableData.push('Артикул\tКорзины\tЗаказы\tСумма, руб');
+    tableData.push('Артикул\tКорзины\tТовары\tЗаказы\tСумма, руб');
     
     // Проходим по всем строкам таблицы
     for (let row of tableBody.children) {
         const cells = row.children;
-        if (cells.length >= 4) {
+        if (cells.length >= 5) {
             // Извлекаем данные из ячеек
             const articul = cells[0].textContent.trim();
             const baskets = cells[1].textContent.trim();
-            const orders = cells[2].textContent.trim();
-            const sumRaw = cells[3].textContent.trim();
+            const goods = cells[2].textContent.trim();
+            const orders = cells[3].textContent.trim();
+            const sumRaw = cells[4] ? cells[4].textContent.trim() : '';
             
             // Убираем форматирование из суммы (пробелы, запятые оставляем только цифры и точки)
             const sumClean = sumRaw.replace(/\s/g, '').replace(/,/g, '.');
             
             // Добавляем строку данных (разделители - табуляция)
-            tableData.push(`${articul}\t${baskets}\t${orders}\t${sumClean}`);
+            tableData.push(`${articul}\t${baskets}\t${goods}\t${orders}\t${sumClean}`);
         }
     }
     
