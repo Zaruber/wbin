@@ -125,8 +125,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="askAdvertId">ID рекламы</label>
-                        <input type="text" id="askAdvertId" placeholder="Например: 25033325" class="form-input">
+                        <label for="askAdvertId">ID рекламы (можно несколько)</label>
+                        <input type="text" id="askAdvertId" placeholder="Например: 25033325, 25033326 25033327" class="form-input">
                     </div>
                     
                     <div class="form-row">
@@ -150,9 +150,9 @@
             </div>
             
             <div id="askResults" style="display: none;">
-                <div class="card">
+                <div class="card" id="askMainSummaryCard">
                     <div class="card-header">
-                        <h3>Результаты анализа</h3>
+                        <h3 id="askResultsHeader">Результаты анализа</h3>
                         <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
                     </div>
                     <div class="card-body">
@@ -181,6 +181,46 @@
                         </div>
                     </div>
                 </div>
+
+                    <div id="askProgressCard" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Прогресс парсинга</h4>
+                            </div>
+                            <div class="card-body">
+                                <ul id="askProgressList" class="progress-list" style="margin:0; padding-left:18px;"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <div id="askPerCampaignSummary" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Итоги по ID кампаний</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID рекламы</th>
+                                                <th>Корзины (РК)</th>
+                                                <th>Ас. Конверсии, руб</th>
+                                                <th>Ас. Корзины, шт</th>
+                                                <th>Ас. Заказы, шт</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="askPerCampaignSummaryBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="actions">
+                                    <button id="askCopyPerCampaign" class="btn btn-secondary">Копировать итоги</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 
                 <div id="askAssociatedDetails" style="display: none;">
                     <div class="card">

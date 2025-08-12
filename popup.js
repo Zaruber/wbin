@@ -107,6 +107,22 @@ function initAskTab() {
     document.getElementById('askCopyDetailsData').addEventListener('click', function() {
         askCopyDetailsTableToClipboard();
     });
+
+    // Кнопка для копирования итогов по ID кампаний (если есть)
+    const copyPerCampaignBtn = document.getElementById('askCopyPerCampaign');
+    if (copyPerCampaignBtn) {
+        copyPerCampaignBtn.addEventListener('click', function() {
+            askCopyPerCampaignSummaryToClipboard();
+        });
+    }
+
+    // Очистка прогресса при открытии вкладки
+    const progressCard = document.getElementById('askProgressCard');
+    const progressList = document.getElementById('askProgressList');
+    if (progressCard && progressList) {
+        progressCard.style.display = 'none';
+        progressList.innerHTML = '';
+    }
     
     // Попытка восстановить последний ID рекламы
     chrome.storage.local.get(['askLastAdvertId'], function(result) {
@@ -116,6 +132,82 @@ function initAskTab() {
     });
 }
 
+// Вспомогательные функции прогресса/таймингов
+let askProgressState = null;
+function askStartProgress(total) {
+    const progressCard = document.getElementById('askProgressCard');
+    const progressList = document.getElementById('askProgressList');
+    if (!progressCard || !progressList) return;
+    askProgressState = {
+        total: total || 1,
+        startedAt: Date.now(),
+        success: 0,
+        fail: 0,
+        current: 0
+    };
+    progressList.innerHTML = '';
+    progressCard.style.display = 'block';
+    askUpdateProgressHeader();
+}
+
+function askUpdateProgressHeader() {
+    const hdr = document.querySelector('#askProgressCard .card-header h4');
+    if (!hdr || !askProgressState) return;
+    const elapsedSec = ((Date.now() - askProgressState.startedAt) / 1000).toFixed(1);
+    hdr.textContent = `Прогресс парсинга — ${askProgressState.current}/${askProgressState.total}, успех: ${askProgressState.success}, ошибки: ${askProgressState.fail} (⏱ ${elapsedSec}с)`;
+}
+
+function askFormatTime(ts) {
+    const d = new Date(ts);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function askProgressLog(message, type = 'info') {
+    const progressList = document.getElementById('askProgressList');
+    const progressCard = document.getElementById('askProgressCard');
+    if (!progressList || !progressCard) return;
+    const li = document.createElement('li');
+    const time = askFormatTime(Date.now());
+    li.textContent = `${time} • ${message}`;
+    if (type === 'error') li.style.color = '#b00020';
+    if (type === 'success') li.style.color = '#0a7a0a';
+    progressList.appendChild(li);
+    // автопрокрутка вниз
+    progressList.scrollTop = progressList.scrollHeight;
+    askUpdateProgressHeader();
+}
+// Копирование итогов по ID кампаний в буфер обмена (TSV)
+function askCopyPerCampaignSummaryToClipboard() {
+    const tbody = document.getElementById('askPerCampaignSummaryBody');
+    if (!tbody || tbody.children.length === 0) {
+        askShowError('Нет итогов для копирования');
+        return;
+    }
+
+    const rows = [];
+    rows.push('ID РК\tКорзины (РК)\tАс. Конверсии, руб\tАс. Корзины, шт\tАс. Заказы, шт');
+    for (const tr of tbody.children) {
+        const tds = tr.children;
+        if (tds.length >= 5) {
+            const id = tds[0].textContent.trim();
+            const atbs = tds[1].textContent.trim();
+            const priceRaw = tds[2].textContent.trim();
+            const price = priceRaw.replace(/[^\d\-,.]/g, '');
+            const assocAtbs = tds[3].textContent.trim();
+            const assocOrders = tds[4].textContent.trim();
+            rows.push(`${id}\t${atbs}\t${price}\t${assocAtbs}\t${assocOrders}`);
+        }
+    }
+
+    const text = rows.join('\n');
+    navigator.clipboard.writeText(text)
+        .then(() => askShowCopySuccess())
+        .catch((e) => {
+            console.error('Не удалось скопировать итоги по ID кампаний:', e);
+            askShowError('Не удалось скопировать итоги по ID кампаний');
+        });
+}
 // Показать сообщение об ошибке в АСК
 function askShowError(message) {
     const errorElement = document.getElementById('askError');
@@ -190,63 +282,275 @@ function askDisplayRawData(data) {
     }
 }
 
-// Функция для получения данных статистики АСК через background script
+// Функция для получения данных статистики АСК через background script (поддержка нескольких ID)
 function askFetchStatsData() {
-    const advertId = document.getElementById('askAdvertId').value.trim();
-    if (!advertId) {
+    const advertIdRaw = document.getElementById('askAdvertId').value.trim();
+    if (!advertIdRaw) {
         askShowError('Пожалуйста, введите ID рекламы');
         return;
     }
-    
+
     const dateFrom = document.getElementById('askDateFrom').value;
     const dateTo = document.getElementById('askDateTo').value;
-    
+
     if (!dateFrom || !dateTo) {
         askShowError('Пожалуйста, выберите даты');
         return;
     }
-    
-    // Сохраняем ID рекламы и даты для будущего использования
+
+    // Поддержка множественного ввода: запятая, точка с запятой, пробелы, переносы строк
+    const idList = advertIdRaw
+        .split(/[\n,;\s]+/)
+        .map(v => v.trim())
+        .filter(v => v.length > 0);
+
+    if (idList.length === 0) {
+        askShowError('Не удалось распознать ID рекламы');
+        return;
+    }
+
+    // Сохраняем исходную строку ID и даты
     chrome.storage.local.set({ 
-        'askLastAdvertId': advertId,
+        'askLastAdvertId': advertIdRaw,
         'askLastDateFrom': dateFrom,
         'askLastDateTo': dateTo
     });
-    
-    // Индикатор загрузки
+
+    // Отображаем блок результатов
+    document.getElementById('askResults').style.display = 'block';
+
+    if (idList.length === 1) {
+        askStartProgress(1);
+        askFetchSingleStatsData(idList[0], dateFrom, dateTo);
+    } else {
+        askStartProgress(idList.length);
+        askFetchMultipleStatsData(idList, dateFrom, dateTo);
+    }
+}
+
+function askFetchSingleStatsData(advertId, dateFrom, dateTo) {
     const fetchButton = document.getElementById('askFetchData');
     const originalText = fetchButton.textContent;
     fetchButton.textContent = 'Загрузка...';
     fetchButton.disabled = true;
-    
-    // Отображаем пустой блок результатов
-    document.getElementById('askResults').style.display = 'block';
-    
-    // Отправляем запрос через background.js для обхода CORS
+
+    askProgressLog(`ID ${advertId}: старт`);
+
     chrome.runtime.sendMessage({
         action: 'askFetchData',
-        params: {
-            advertId: advertId,
-            dateFrom: dateFrom,
-            dateTo: dateTo
-        }
+        params: { advertId, dateFrom, dateTo }
     }, function(response) {
         fetchButton.textContent = originalText;
         fetchButton.disabled = false;
-        
-        // Всегда показываем сырые данные, даже если есть ошибка
+
+        // Обычный одиночный режим: показываем основную сводку
+        const headerEl = document.getElementById('askResultsHeader');
+        if (headerEl) headerEl.textContent = 'Результаты анализа';
+        const mainCard = document.getElementById('askMainSummaryCard');
+        if (mainCard) mainCard.style.display = 'block';
+        const perCamp = document.getElementById('askPerCampaignSummary');
+        if (perCamp) perCamp.style.display = 'none';
+
+        askProgressState.current = 1;
         askDisplayRawData(response || { error: 'Нет ответа от background скрипта' });
-        
+
         if (response && response.success && response.data) {
-            // Обрабатываем и показываем данные
+            askProgressState.success += 1;
+            askProgressLog(`ID ${advertId}: успех`, 'success');
             askProcessData(response.data);
         } else {
+            askProgressState.fail += 1;
+            askProgressLog(`ID ${advertId}: ошибка — ${response ? (response.error || 'нет ответа') : 'нет ответа'}`, 'error');
             console.error('Ошибка при получении данных АСК:', response ? response.error : 'Ответ не получен');
             askShowError('Ошибка при получении данных. Авторизуйтесь на сайте WB и попробуйте снова.');
         }
     });
 }
 
+async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
+    const fetchButton = document.getElementById('askFetchData');
+    const originalText = fetchButton.textContent;
+    fetchButton.disabled = true;
+
+    try {
+        const aggregated = { content: { nmStats: [], sideNmStats: [], sum_price: 0 } };
+        const nmStatsMap = {};
+        const sideNmStatsMap = {};
+        const rawPerId = [];
+        const perCampaign = []; // для итогов по каждому ID
+        const baseDelayMs = 2500; // базовая задержка между запросами для снижения 429
+
+        for (let i = 0; i < idList.length; i++) {
+            const id = idList[i];
+            fetchButton.textContent = `Загрузка ${i + 1}/${idList.length}...`;
+            askProgressState.current = i; // до начала обработки текущего
+            askProgressLog(`ID ${id}: старт`);
+
+            // eslint-disable-next-line no-await-in-loop
+            let response = await new Promise((resolve) => {
+                chrome.runtime.sendMessage({
+                    action: 'askFetchData',
+                    params: { advertId: id, dateFrom, dateTo }
+                }, (resp) => resolve(resp));
+            });
+
+            // Простой ретрай: если нет успеха, подождём и повторим 1 раз
+            if (!(response && response.success)) {
+                askProgressLog(`ID ${id}: ошибка, готовим повтор...`, 'error');
+                const retryWait = baseDelayMs + Math.floor(Math.random() * 700);
+                askProgressLog(`ID ${id}: ретрай через ${retryWait} мс`);
+                await askSleep(retryWait);
+                // eslint-disable-next-line no-await-in-loop
+                response = await new Promise((resolve) => {
+                    chrome.runtime.sendMessage({
+                        action: 'askFetchData',
+                        params: { advertId: id, dateFrom, dateTo }
+                    }, (resp) => resolve(resp));
+                });
+            }
+
+            rawPerId.push({ id, response });
+
+            if (!(response && response.success && response.data)) {
+                console.warn('Пропускаем ID из-за ошибки:', id, response && response.error);
+                askProgressState.fail += 1;
+                askProgressLog(`ID ${id}: не удалось получить данные`, 'error');
+                continue;
+            }
+
+            const unified = askToUnifiedFormat(response.data);
+            if (!unified || !unified.content) {
+                console.warn('Неизвестный формат данных, пропускаем ID', id);
+                askProgressState.fail += 1;
+                askProgressLog(`ID ${id}: неизвестный формат данных`, 'error');
+                continue;
+            }
+
+            aggregated.content.sum_price += (unified.content.sum_price || 0);
+
+            if (Array.isArray(unified.content.nmStats)) {
+                unified.content.nmStats.forEach((item) => {
+                    const key = String(item.nm_id || item.nmId || 'unknown');
+                    if (!nmStatsMap[key]) {
+                        nmStatsMap[key] = { nm_id: key, name: item.name || '', atbs: 0, sum_price: 0 };
+                    }
+                    nmStatsMap[key].atbs += (item.atbs || 0);
+                    nmStatsMap[key].sum_price += (item.sum_price || 0);
+                });
+            }
+
+            if (Array.isArray(unified.content.sideNmStats)) {
+                unified.content.sideNmStats.forEach((item) => {
+                    const key = String(item.nm_id || item.nmId || 'unknown');
+                    if (!sideNmStatsMap[key]) {
+                        sideNmStatsMap[key] = { nm_id: key, name: item.name || '', atbs: 0, orders: 0, shks: 0, sum_price: 0 };
+                    }
+                    sideNmStatsMap[key].atbs += (item.atbs || 0);
+                    sideNmStatsMap[key].orders += (item.orders || 0);
+                    sideNmStatsMap[key].shks += (item.shks || 0);
+                    sideNmStatsMap[key].sum_price += (item.sum_price || 0);
+                });
+            }
+
+            // Подсчет итогов по данному ID
+            let atbsNm = 0;
+            if (Array.isArray(unified.content.nmStats)) {
+                unified.content.nmStats.forEach((it) => { atbsNm += (it.atbs || 0); });
+            }
+            let assocAtbs = 0, assocOrders = 0, assocPrice = 0;
+            if (Array.isArray(unified.content.sideNmStats)) {
+                unified.content.sideNmStats.forEach((it) => {
+                    assocAtbs += (it.atbs || 0);
+                    assocOrders += (it.orders || 0);
+                    assocPrice += (it.sum_price || 0);
+                });
+            }
+            perCampaign.push({ id, atbsNm, assocPrice, assocAtbs, assocOrders });
+            askProgressState.success += 1;
+            askProgressLog(`ID ${id}: успех (корзины=${atbsNm}, ас.руб=${assocPrice})`, 'success');
+
+            // Пауза между запросами, чтобы сгладить всплески (и снизить шанс 429)
+            if (i < idList.length - 1) {
+                const jitter = Math.floor(Math.random() * 500); // 0-500 мс
+                const waitMs = baseDelayMs + jitter;
+                fetchButton.textContent = `Пауза ${i + 1}/${idList.length}…`;
+                askProgressLog(`ID ${id}: пауза ${waitMs} мс`);
+                // eslint-disable-next-line no-await-in-loop
+                await askSleep(waitMs);
+            }
+            askProgressState.current = i + 1;
+            askUpdateProgressHeader();
+        }
+
+        aggregated.content.nmStats = Object.values(nmStatsMap);
+        aggregated.content.sideNmStats = Object.values(sideNmStatsMap);
+
+        askDisplayRawData({ items: rawPerId });
+        // Не показываем общий агрегат как "Результаты анализа" при множественном режиме,
+        // вместо этого заполним пер-кампанийную таблицу и скорректируем заголовок/видимость
+        const headerEl = document.getElementById('askResultsHeader');
+        if (headerEl) headerEl.textContent = 'Результаты анализа (по ID кампаний)';
+        const mainCard = document.getElementById('askMainSummaryCard');
+        if (mainCard) mainCard.style.display = 'none';
+        // В множественном режиме всё равно показываем нижнюю детализацию асс. конверсий (по сумме)
+        // поэтому после отрисовки агрегата вручную включим блок и заполним его суммарными sideNmStats
+
+        // Отобразим итоги по каждому ID
+        try {
+            const container = document.getElementById('askPerCampaignSummary');
+            const tbody = document.getElementById('askPerCampaignSummaryBody');
+            if (container && tbody) {
+                tbody.innerHTML = '';
+                perCampaign.forEach((row) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.id}</td>
+                        <td>${row.atbsNm}</td>
+                        <td>${new Intl.NumberFormat('ru-RU').format(row.assocPrice)}</td>
+                        <td>${row.assocAtbs}</td>
+                        <td>${row.assocOrders}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                container.style.display = perCampaign.length > 0 ? 'block' : 'none';
+            }
+            // Отрисуем агрегированную детализацию снизу
+            const detailsContainer = document.getElementById('askAssociatedDetails');
+            if (detailsContainer) {
+                detailsContainer.style.display = 'block';
+            }
+            // Сконструируем aggregated из карт для использования в askPopulateAssociatedDetailsTable
+            const aggregatedForDetails = { content: { sideNmStats: Object.values(sideNmStatsMap) } };
+            askPopulateAssociatedDetailsTable(aggregatedForDetails.content.sideNmStats);
+        } catch (e) {
+            console.warn('Не удалось отобразить итоги по ID кампаний:', e);
+        }
+
+        // Финальный итог
+        askProgressLog(`Готово: успех=${askProgressState.success}, ошибки=${askProgressState.fail}, всего=${askProgressState.total}`);
+    } catch (e) {
+        console.error('Ошибка при массовой загрузке АСК:', e);
+        askShowError('Ошибка при массовой загрузке данных АСК');
+    } finally {
+        fetchButton.textContent = originalText;
+        fetchButton.disabled = false;
+    }
+}
+
+function askSleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function askToUnifiedFormat(data) {
+    if (data && data.content && data.content.nmStats) {
+        return data;
+    }
+    if (data && data.stats) {
+        return askConvertApiV5DataToOldFormat(data);
+    }
+    return null;
+}
+ 
 // Функция для обработки данных АСК из API
 function askProcessData(data) {
     console.log('Обрабатываем данные API АСК:', data);

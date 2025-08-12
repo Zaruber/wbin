@@ -537,7 +537,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               console.error('Ошибка при закрытии вкладки АСК:', e);
             }
           }
-        }, 20000); // 20 секунд на загрузку
+        }, 40000); // увеличили таймаут до 40 секунд на загрузку
         
         // Слушатель для получения данных API АСК
         function apiDataListener(message) {
@@ -573,7 +573,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         setTimeout(() => {
           chrome.runtime.onMessage.removeListener(apiDataListener);
           console.log('Удален слушатель apiDataListener для АСК');
-        }, 25000); // немного больше чем основной таймаут
+        }, 45000); // немного больше чем основной таймаут
       });
     });
     

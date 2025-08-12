@@ -1,5 +1,7 @@
 // Этот код будет выполняться в контексте целевой страницы до загрузки скриптов сайта
 console.log('WBin inject.js загружен на ' + location.href);
+// Флаг: получили ли уже данные fullstat
+window.__wbin_ask_received = false;
 
 // Перехват XMLHttpRequest до загрузки страницы (АСК и Кампании)
 const originalXHROpen = XMLHttpRequest.prototype.open;
@@ -103,6 +105,7 @@ window.fetch = function(resource, init) {
         responseClone.json()
           .then(data => {
             console.log('Получены данные API v5 через fetch (АСК)');
+            try { window.__wbin_ask_received = true; } catch(_) {}
             
             // Передаем данные в window для доступа из content script
             window.postMessage({
@@ -271,4 +274,66 @@ if (location.pathname.startsWith('/campaigns/list')) {
   } catch (e) {
     // noop
   }
+}
+
+// Если мы на странице детальной статистики кампании (АСК) — форсим fullstat при задержке
+if (location.pathname.startsWith('/campaigns/statistics/details/')) {
+  (function ensureAskFullstat() {
+    try {
+      const url = new URL(location.href);
+      const idMatch = location.pathname.match(/details\/(\d+)/);
+      const advertId = idMatch ? idMatch[1] : null;
+      const fromRaw = url.searchParams.get('from');
+      const toRaw = url.searchParams.get('to');
+
+      if (!advertId || !fromRaw || !toRaw) return;
+
+      const toIso = new Date(toRaw + 'T23:59:59Z').toISOString().replace('.000Z','Z');
+      const fromIso = new Date(fromRaw + 'T00:00:00Z').toISOString().replace('.000Z','Z');
+
+      const buildFullstatUrl = () => `${location.origin}/api/v5/fullstat?advertID=${advertId}&to=${encodeURIComponent(toIso)}&from=${encodeURIComponent(fromIso)}&appType=0&placementType=0`;
+
+      const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+      const forceFetch = async () => {
+        // Подождём чуть-чуть, вдруг фронт WB сам дернёт
+        await sleep(2000);
+        if (window.__wbin_ask_received) return;
+        const url = buildFullstatUrl();
+        console.log('WBin: форсируем запрос fullstat:', url);
+        try {
+          let attempt = 0;
+          let delayMs = 800;
+          while (attempt < 2 && !window.__wbin_ask_received) {
+            attempt++;
+            const resp = await originalFetch.call(window, url, { credentials: 'same-origin' });
+            if (resp && resp.ok) {
+              const data = await resp.clone().json().catch(() => null);
+              if (data) {
+                try { window.__wbin_ask_received = true; } catch(_) {}
+                window.postMessage({
+                  source: 'wbin-ask-inject',
+                  action: 'askApiDataCaptured',
+                  data,
+                  url
+                }, '*');
+                break;
+              }
+            } else {
+              // Если 429/5xx — подождём и повторим
+              await sleep(delayMs + Math.floor(Math.random()*400));
+              delayMs *= 2;
+            }
+          }
+        } catch (e) {
+          console.warn('WBin: не удалось форсировать fullstat:', e);
+        }
+      };
+
+      // Запускаем форс только если в течение 3.5с не пришли данные
+      setTimeout(() => { if (!window.__wbin_ask_received) forceFetch(); }, 3500);
+    } catch (e) {
+      // noop
+    }
+  })();
 }
