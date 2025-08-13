@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WBin",
   "version": "1.4",
-  "description": "Показывает RAW данные API v5 вместо v6",
+  "description": "Скачивание данных, статистики, фин. отчетов с сайта Wildberries простым способом",
   "icons": {
     "16": "16.png",
     "32": "32.png",
