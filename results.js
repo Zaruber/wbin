@@ -267,7 +267,7 @@ function parseStatsDataForTable(data) {
                 const cpc = stat.cpc || 0;
                 const cr = stat.cr || 0;
                 const atbs = stat.atbs || 0; // Корзины
-                const orders = stat.orders || 0;
+                const orders = stat.shks || 0;
                 const sum = stat.sum || 0;
                 
                 // Добавляем ячейки с данными
