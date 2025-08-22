@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBin — Анализ АСК</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="ask-page">
+    <div class="container">
+        <div class="header">
+            <div class="app-info">
+                <div class="app-icon">
+                    <img src="48.png" alt="WBin">
+                </div>
+                <div class="app-details">
+                    <h1 class="app-name">WBin</h1>
+                    <span class="app-version">v1.4</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="ask-page">
+            <div class="ask-toolbar">
+                <div class="ask-toolbar-row">
+                    <div class="form-group" style="flex:2;">
+                        <label for="askAdvertId">ID рекламы (можно несколько)</label>
+                        <input type="text" id="askAdvertId" placeholder="Например: 25033325, 25033326 25033327" class="form-input">
+                    </div>
+                    <div class="form-row" style="flex:1;">
+                        <div class="form-group">
+                            <label for="askDateFrom">Дата с</label>
+                            <input type="date" id="askDateFrom" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="askDateTo">Дата по</label>
+                            <input type="date" id="askDateTo" class="form-input">
+                        </div>
+                    </div>
+                    <div class="actions" style="flex-shrink:0;">
+                        <button id="askFetchData" class="btn btn-primary btn-icon" title="Получить данные" aria-label="Получить данные">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 3a1 1 0 0 1 1 1v8.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 1.414-1.414L11 12.586V4a1 1 0 0 1 1-1z"></path>
+                                <path d="M5 20a2 2 0 0 1-2-2v-2a1 1 0 1 1 2 0v2h14v-2a1 1 0 1 1 2 0v2a2 2 0 0 1-2 2H5z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="askError" class="error-message"></div>
+            </div>
+
+            <div class="ask-layout">
+                <div class="ask-col-left">
+                    <div id="askPerCampaignSummary" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Итоги по ID кампаний</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID Кампании</th>
+                                                <th>Корзины (Базовые)</th>
+                                                <th>Заказы (Базовые)</th>
+                                                <th>Корзины (Ас.К)</th>
+                                                <th>Заказы, шт (Ас.К)</th>
+                                                <th>Заказы, руб (Ас.К)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="askPerCampaignSummaryBody"></tbody>
+                                    </table>
+                                </div>
+                                <div class="actions">
+                                    <button id="askCopyPerCampaign" class="btn btn-secondary">Копировать итоги</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="askProgressCard" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Прогресс парсинга</h4>
+                            </div>
+                            <div class="card-body">
+                                <ul id="askProgressList" class="progress-list" style="margin:0; padding-left:18px;"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="askToggleRaw" class="btn btn-ghost">Показать сырые данные</button>
+                    <div id="askRawData" class="raw-data"></div>
+                </div>
+
+                <div class="ask-col-right">
+                    <div id="askResults" style="display: none;">
+                        <div class="card" id="askMainSummaryCard">
+                            <div class="card-header">
+                                <h3 id="askResultsHeader">Результаты анализа</h3>
+                                <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container" style="margin-bottom:16px;">
+                                    <table class="data-table" id="askBaseStatsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>ID кампании</th>
+                                                <th>Артикул</th>
+                                                <th>Ср. позиция</th>
+                                                <th>Затраты</th>
+                                                <th>Заказы, руб</th>
+                                                <th>Показы</th>
+                                                <th>Клики</th>
+                                                <th>Корзины</th>
+                                                <th>Заказы, шт</th>
+                                                <th>CTR</th>
+                                                <th>CR</th>
+                                                <th>CPM</th>
+                                                <th>CPC</th>
+                                                <th>CPO</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="askBaseStatsBody"></tbody>
+                                    </table>
+                                </div>
+                                <div class="table-container">
+                                    <table class="data-table" id="askAssocTable">
+                                        <thead>
+                                            <tr>
+                                                <th>ID кампании</th>
+                                                <th>Артикул</th>
+                                                <th>Заказов на сумму</th>
+                                                <th>Корзины</th>
+                                                <th>Заказы, шт</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="askAssocBody"></tbody>
+                                    </table>
+                                </div>
+                                <div class="actions">
+                                    <button id="askCopyData" class="btn btn-secondary">Копировать данные</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
+
+

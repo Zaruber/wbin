@@ -274,13 +274,13 @@ function askCopyResultsToClipboard() {
     for (const row of assocTable.children) {
         const cells = row.children;
         if (cells.length >= 5) {
-            const cid = cells[0].textContent.trim();
+            const campaignId = cells[0].textContent.trim();
             const articul = cells[1].textContent.trim();
             const sumRaw = cells[2].textContent.trim();
             const baskets = cells[3].textContent.trim();
             const orders = cells[4].textContent.trim();
             const sumClean = sumRaw.replace(/\s/g, '').replace(/,/g, '.');
-            dataToCopy += `${cid}\t${articul}\t${sumClean}\t${baskets}\t${orders}\n`;
+            dataToCopy += `${campaignId}\t${articul}\t${sumClean}\t${baskets}\t${orders}\n`;
         }
     }
     
@@ -485,8 +485,7 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                                     cr: 0,
                                     cpm: 0,
                                     cpc: 0,
-                                    cpo: 0,
-                                    advert_ids: []
+                                    cpo: 0
                                 };
                             }
                             nmStatsMap[key].atbs += (variation.atbs || 0);
@@ -515,9 +514,6 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                             if (variation.cpo != null) {
                                 nmStatsMap[key].cpo = (nmStatsMap[key].cpo + variation.cpo) / 2;
                             }
-                            if (nmStatsMap[key].advert_ids.indexOf(id) === -1) {
-                                nmStatsMap[key].advert_ids.push(id);
-                            }
                         });
                     } else {
                         // Если нет вариаций, используем основной объект
@@ -537,8 +533,7 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                                 cr: 0,
                                 cpm: 0,
                                 cpc: 0,
-                                cpo: 0,
-                                advert_ids: []
+                                cpo: 0
                             };
                         }
                         nmStatsMap[key].atbs += (item.atbs || 0);
@@ -565,9 +560,6 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                         if (item.cpo != null) {
                             nmStatsMap[key].cpo = (nmStatsMap[key].cpo + item.cpo) / 2;
                         }
-                        if (nmStatsMap[key].advert_ids.indexOf(id) === -1) {
-                            nmStatsMap[key].advert_ids.push(id);
-                        }
                     }
                 });
             }
@@ -576,15 +568,12 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                 unified.content.sideNmStats.forEach((item) => {
                     const key = String(item.nm_id || item.nmId || 'unknown');
                     if (!sideNmStatsMap[key]) {
-                        sideNmStatsMap[key] = { nm_id: key, name: item.name || '', atbs: 0, orders: 0, shks: 0, sum_price: 0, advert_ids: [] };
+                        sideNmStatsMap[key] = { nm_id: key, name: item.name || '', atbs: 0, orders: 0, shks: 0, sum_price: 0 };
                     }
                     sideNmStatsMap[key].atbs += (item.atbs || 0);
                     sideNmStatsMap[key].orders += (item.orders || 0);
                     sideNmStatsMap[key].shks += (item.shks || 0);
                     sideNmStatsMap[key].sum_price += (item.sum_price || 0);
-                    if (sideNmStatsMap[key].advert_ids.indexOf(id) === -1) {
-                        sideNmStatsMap[key].advert_ids.push(id);
-                    }
                 });
             }
 
@@ -670,12 +659,9 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                 });
                 container.style.display = perCampaign.length > 0 ? 'block' : 'none';
             }
-            // Заполним таблицы в основной карточке
-            askFillBaseAndAssocTables({
-                advertId: '—',
-                nmStats: aggregated.content.nmStats,
-                sideNmStats: aggregated.content.sideNmStats
-            });
+            // В массовом режиме показываем данные по каждой кампании отдельно
+            askFillBaseTableForMultiple(rawPerId);
+            askFillAssocTableForMultiple(rawPerId);
         } catch (e) {
             console.warn('Не удалось отобразить итоги по ID кампаний:', e);
         }
@@ -892,16 +878,13 @@ function askFillBaseAndAssocTables({ advertId, nmStats, sideNmStats }) {
     // Базовая таблица: обрабатываем nmStats с учетом imt_nm_stats
     if (baseBody && Array.isArray(nmStats)) {
         nmStats.forEach((item) => {
-            const idCellValue = (advertId && advertId !== '—')
-                ? advertId
-                : (item.advert_ids && item.advert_ids.length ? item.advert_ids.join(', ') : '—');
             // Проверяем, есть ли imt_nm_stats (вариации товара)
             if (item.imt_nm_stats && Array.isArray(item.imt_nm_stats) && item.imt_nm_stats.length > 0) {
                 // Если есть вариации, добавляем каждую как отдельную строку
                 item.imt_nm_stats.forEach((variation) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${idCellValue}</td>
+                        <td>${advertId || '—'}</td>
                         <td>${variation.nm_id || ''}</td>
                         <td>${variation.avg_position != null ? variation.avg_position : ''}</td>
                         <td>${variation.spend != null ? fmt.format(variation.spend) : ''}</td>
@@ -922,7 +905,7 @@ function askFillBaseAndAssocTables({ advertId, nmStats, sideNmStats }) {
                 // Если нет вариаций, используем основной объект
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${idCellValue}</td>
+                    <td>${advertId || '—'}</td>
                     <td>${item.nm_id || ''}</td>
                     <td>${item.avg_position != null ? item.avg_position : ''}</td>
                     <td>${item.spend != null ? fmt.format(item.spend) : ''}</td>
@@ -943,11 +926,11 @@ function askFillBaseAndAssocTables({ advertId, nmStats, sideNmStats }) {
     }
 
     // Ассоциированная таблица: используем уже существующую функцию заполнения
-    askPopulateAssociatedDetailsTable(sideNmStats || [], advertId);
+    askPopulateAssociatedDetailsTable(sideNmStats || []);
 }
 
 // Функция для заполнения таблицы с детализацией ассоциированных конверсий АСК
-function askPopulateAssociatedDetailsTable(sideNmStats, advertId) {
+function askPopulateAssociatedDetailsTable(sideNmStats) {
     // Заполняем новую таблицу ассоциированных конверсий в основной карточке
     const assocBody = document.getElementById('askAssocBody');
     if (!assocBody) return;
@@ -956,12 +939,8 @@ function askPopulateAssociatedDetailsTable(sideNmStats, advertId) {
     const sortedStats = sideNmStats.sort((a, b) => (b.sum_price || 0) - (a.sum_price || 0));
     const fmt = new Intl.NumberFormat('ru-RU');
     sortedStats.forEach(item => {
-        const idCell = (item.advert_ids && item.advert_ids.length)
-            ? item.advert_ids.join(', ')
-            : (advertId || '—');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${idCell}</td>
             <td>${item.nm_id}</td>
             <td>${fmt.format(item.sum_price || 0)}</td>
             <td>${item.atbs || 0}</td>
@@ -990,7 +969,7 @@ function askCopyDetailsTableToClipboard() {
         const cells = row.children;
         if (cells.length >= 5) {
             // Извлекаем данные из ячеек
-            const cid = cells[0].textContent.trim();
+            const campaignId = cells[0].textContent.trim();
             const articul = cells[1].textContent.trim();
             const sumRaw = cells[2].textContent.trim();
             const baskets = cells[3].textContent.trim();
@@ -998,7 +977,7 @@ function askCopyDetailsTableToClipboard() {
             const sumClean = sumRaw.replace(/\s/g, '').replace(/,/g, '.');
             
             // Добавляем строку данных (разделители - табуляция)
-            tableData.push(`${cid}\t${articul}\t${sumClean}\t${baskets}\t${orders}`);
+            tableData.push(`${campaignId}\t${articul}\t${sumClean}\t${baskets}\t${orders}`);
         }
     }
     
@@ -1016,3 +995,91 @@ function askCopyDetailsTableToClipboard() {
             askShowError('Не удалось скопировать таблицу. Проверьте разрешения.');
         });
 } 
+
+function askFillBaseTableForMultiple(rawPerId) {
+    const baseBody = document.getElementById('askBaseStatsBody');
+    if (!baseBody) return;
+    baseBody.innerHTML = '';
+
+    const fmt = new Intl.NumberFormat('ru-RU');
+
+    rawPerId.forEach(({ id, response }) => {
+        if (!(response && response.success && response.data)) return;
+        const unified = askToUnifiedFormat(response.data);
+        if (!(unified && unified.content && Array.isArray(unified.content.nmStats))) return;
+
+        unified.content.nmStats.forEach((item) => {
+            // Проверяем, есть ли imt_nm_stats (вариации товара)
+            if (item.imt_nm_stats && Array.isArray(item.imt_nm_stats) && item.imt_nm_stats.length > 0) {
+                // Если есть вариации, добавляем каждую как отдельную строку
+                item.imt_nm_stats.forEach((variation) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${id}</td>
+                        <td>${variation.nm_id || ''}</td>
+                        <td>${variation.avg_position != null ? variation.avg_position : ''}</td>
+                        <td>${variation.spend != null ? fmt.format(variation.spend) : ''}</td>
+                        <td>${variation.sum_price != null ? fmt.format(variation.sum_price) : ''}</td>
+                        <td>${variation.views != null ? variation.views : ''}</td>
+                        <td>${variation.clicks != null ? variation.clicks : ''}</td>
+                        <td>${variation.atbs != null ? variation.atbs : 0}</td>
+                        <td>${variation.shks != null ? variation.shks : ''}</td>
+                        <td>${variation.ctr != null ? variation.ctr : ''}</td>
+                        <td>${variation.cr != null ? variation.cr : ''}</td>
+                        <td>${variation.cpm != null ? variation.cpm : ''}</td>
+                        <td>${variation.cpc != null ? variation.cpc : ''}</td>
+                        <td>${variation.cpo != null ? variation.cpo : ''}</td>
+                    `;
+                    baseBody.appendChild(row);
+                });
+            } else {
+                // Если нет вариаций, используем основной объект
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${id}</td>
+                    <td>${item.nm_id || ''}</td>
+                    <td>${item.avg_position != null ? item.avg_position : ''}</td>
+                    <td>${item.spend != null ? fmt.format(item.spend) : ''}</td>
+                    <td>${item.sum_price != null ? fmt.format(item.sum_price) : ''}</td>
+                    <td>${item.views != null ? item.views : ''}</td>
+                    <td>${item.clicks != null ? item.clicks : ''}</td>
+                    <td>${item.atbs != null ? item.atbs : 0}</td>
+                    <td>${item.shks != null ? item.shks : ''}</td>
+                    <td>${item.ctr != null ? item.ctr : ''}</td>
+                    <td>${item.cr != null ? item.cr : ''}</td>
+                    <td>${item.cpm != null ? item.cpm : ''}</td>
+                    <td>${item.cpc != null ? item.cpc : ''}</td>
+                    <td>${item.cpo != null ? item.cpo : ''}</td>
+                `;
+                baseBody.appendChild(row);
+            }
+        });
+    });
+}
+
+function askFillAssocTableForMultiple(rawPerId) {
+    const assocBody = document.getElementById('askAssocBody');
+    if (!assocBody) return;
+    assocBody.innerHTML = '';
+
+    const fmt = new Intl.NumberFormat('ru-RU');
+
+    rawPerId.forEach(({ id, response }) => {
+        if (!(response && response.success && response.data)) return;
+        const unified = askToUnifiedFormat(response.data);
+        if (!(unified && unified.content && Array.isArray(unified.content.sideNmStats))) return;
+
+        // Показываем ассоциированные конверсии для каждой кампании отдельно
+        unified.content.sideNmStats.forEach((item) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${id}</td>
+                <td>${item.nm_id || ''}</td>
+                <td>${fmt.format(item.sum_price || 0)}</td>
+                <td>${item.atbs || 0}</td>
+                <td>${item.shks || 0}</td>
+            `;
+            assocBody.appendChild(row);
+        });
+    });
+}

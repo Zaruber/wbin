@@ -43,7 +43,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["results.html", "results.js", "popup.css", "popup.js", "github-logo.svg", "inject.js"],
+      "resources": ["results.html", "results.js", "popup.css", "popup.js", "ask.html", "github-logo.svg", "inject.js"],
       "matches": ["<all_urls>"]
     }
   ]

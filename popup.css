@@ -38,6 +38,24 @@ body {
   overflow-x: hidden;
 }
 
+/* Full-page ask view overrides */
+body.ask-page {
+  max-width: none;
+  min-height: 100vh;
+  background: #fafbfc;
+}
+
+body.ask-page .container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+body.ask-page .content {
+  padding: 24px 0;
+  flex: 1;
+}
+
 .container {
   padding: 0;
   min-height: 100vh;
@@ -165,6 +183,249 @@ body {
 .content {
   padding: 20px;
   flex: 1;
+}
+
+/* ASK page layout */
+.ask-toolbar {
+  background: var(--white);
+  border: 1px solid rgba(60,60,67,0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+  padding: 20px 24px;
+}
+
+.ask-toolbar-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.ask-toolbar-row:last-child {
+  margin-bottom: 0;
+}
+
+.ask-toolbar-row:first-child {
+  align-items: flex-end;
+}
+
+.ask-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  min-height: 600px;
+}
+
+.ask-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ask-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0; /* Предотвращает переполнение */
+}
+
+/* Enhanced cards for ask page */
+.ask-page .card {
+  border: 1px solid rgba(60,60,67,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* Table containers with fixed heights */
+.ask-page .table-container {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  height: fit-content;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ask-page .data-table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+.ask-page .data-table th {
+  background: linear-gradient(180deg, #fafbfc 0%, #f1f3f4 100%);
+  border-bottom: 1px solid var(--border-light);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 12px 8px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ask-page .data-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(60,60,67,0.04);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Column widths for base stats table */
+.ask-page #askBaseStatsTable th:nth-child(1),
+.ask-page #askBaseStatsTable td:nth-child(1) { width: 100px; } /* ID кампании */
+.ask-page #askBaseStatsTable th:nth-child(2),
+.ask-page #askBaseStatsTable td:nth-child(2) { width: 80px; }  /* Артикул */
+.ask-page #askBaseStatsTable th:nth-child(3),
+.ask-page #askBaseStatsTable td:nth-child(3) { width: 70px; }  /* Позиция */
+.ask-page #askBaseStatsTable th:nth-child(4),
+.ask-page #askBaseStatsTable td:nth-child(4) { width: 80px; }  /* Затраты */
+.ask-page #askBaseStatsTable th:nth-child(5),
+.ask-page #askBaseStatsTable td:nth-child(5) { width: 90px; }  /* Заказы руб */
+.ask-page #askBaseStatsTable th:nth-child(6),
+.ask-page #askBaseStatsTable td:nth-child(6) { width: 70px; }  /* Показы */
+.ask-page #askBaseStatsTable th:nth-child(7),
+.ask-page #askBaseStatsTable td:nth-child(7) { width: 60px; }  /* Клики */
+.ask-page #askBaseStatsTable th:nth-child(8),
+.ask-page #askBaseStatsTable td:nth-child(8) { width: 70px; }  /* Корзины */
+.ask-page #askBaseStatsTable th:nth-child(9),
+.ask-page #askBaseStatsTable td:nth-child(9) { width: 70px; }  /* Заказы шт */
+.ask-page #askBaseStatsTable th:nth-child(10),
+.ask-page #askBaseStatsTable td:nth-child(10) { width: 60px; } /* CTR */
+.ask-page #askBaseStatsTable th:nth-child(11),
+.ask-page #askBaseStatsTable td:nth-child(11) { width: 60px; } /* CR */
+.ask-page #askBaseStatsTable th:nth-child(12),
+.ask-page #askBaseStatsTable td:nth-child(12) { width: 60px; } /* CPM */
+.ask-page #askBaseStatsTable th:nth-child(13),
+.ask-page #askBaseStatsTable td:nth-child(13) { width: 60px; } /* CPC */
+.ask-page #askBaseStatsTable th:nth-child(14),
+.ask-page #askBaseStatsTable td:nth-child(14) { width: 60px; } /* CPO */
+
+/* Column widths for assoc table */
+.ask-page #askAssocTable th:nth-child(1),
+.ask-page #askAssocTable td:nth-child(1) { width: 120px; } /* ID кампании */
+.ask-page #askAssocTable th:nth-child(2),
+.ask-page #askAssocTable td:nth-child(2) { width: 100px; } /* Артикул */
+.ask-page #askAssocTable th:nth-child(3),
+.ask-page #askAssocTable td:nth-child(3) { width: 120px; } /* Заказов на сумму */
+.ask-page #askAssocTable th:nth-child(4),
+.ask-page #askAssocTable td:nth-child(4) { width: 80px; }  /* Корзины */
+.ask-page #askAssocTable th:nth-child(5),
+.ask-page #askAssocTable td:nth-child(5) { width: 80px; }  /* Заказы шт */
+
+/* Progress list styling */
+.progress-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.progress-list li {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  border-left: 3px solid transparent;
+  background: rgba(10, 132, 255, 0.05);
+  border-left-color: var(--primary-blue);
+}
+
+.progress-list li.success {
+  background: rgba(52, 199, 89, 0.08);
+  border-left-color: var(--success);
+  color: #1d4332;
+}
+
+.progress-list li.error {
+  background: rgba(255, 59, 48, 0.08);
+  border-left-color: var(--error);
+  color: #7a1e1e;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .ask-layout {
+    grid-template-columns: 300px 1fr;
+    gap: 16px;
+  }
+  
+  body.ask-page .container {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .ask-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .ask-toolbar-row {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .ask-toolbar {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ask-toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .ask-toolbar {
+    padding: 16px;
+  }
+  
+  body.ask-page .content {
+    padding: 16px 0;
+  }
+  
+  .ask-col-left,
+  .ask-col-right {
+    gap: 12px;
+  }
+  
+  .ask-page .data-table th,
+  .ask-page .data-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+  
+  /* Сокращаем ширины колонок на мобильных */
+  .ask-page #askBaseStatsTable th,
+  .ask-page #askBaseStatsTable td,
+  .ask-page #askAssocTable th,
+  .ask-page #askAssocTable td {
+    width: auto;
+    min-width: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  body.ask-page .container {
+    padding: 0 12px;
+  }
+  
+  .ask-toolbar {
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+  
+  .ask-layout {
+    gap: 12px;
+  }
 }
 
 /* Cards */
@@ -301,6 +562,8 @@ body {
   background: var(--white);
   transition: all 0.2s ease;
   font-family: inherit;
+  height: 40px;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -322,6 +585,16 @@ body {
   margin-bottom: 20px;
   font-size: 13px;
   color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+/* Info banner in toolbar */
+.ask-toolbar .info-banner {
+  margin-bottom: 0;
+  flex: 1;
 }
 
 .info-banner a {
@@ -347,10 +620,11 @@ body {
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease;
   text-decoration: none;
   line-height: 1.2;
-  will-change: transform, background-color;
+  height: 40px;
+  box-sizing: border-box;
 }
 
 .btn:disabled {
@@ -366,7 +640,6 @@ body {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-blue-hover);
-  transform: translateY(-0.5px);
 }
 
 .btn-secondary {
@@ -387,6 +660,32 @@ body {
 .btn-ghost:hover:not(:disabled) {
   color: var(--text-primary);
   background: var(--secondary-gray-light);
+}
+
+/* Icon-only button */
+.btn-icon {
+  width: 40px;
+  padding: 0;
+}
+
+.btn-icon svg {
+  display: block;
+}
+
+/* Spinner for icon-only button */
+.btn-icon .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.7);
+  border-top-color: rgba(255,255,255,0.2);
+  border-right-color: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  animation: ask-spin 0.8s linear infinite;
+}
+
+@keyframes ask-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .btn-large {
@@ -413,6 +712,13 @@ body {
   border: 1px solid rgba(60,60,67,0.12);
   border-radius: var(--radius);
   margin-bottom: 16px;
+}
+
+/* Override for ask page tables */
+.ask-page .table-container {
+  border: none;
+  border-radius: 0;
+  margin-bottom: 0;
 }
 
 .data-table {
