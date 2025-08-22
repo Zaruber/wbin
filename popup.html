@@ -160,26 +160,41 @@
                         <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
                     </div>
                     <div class="card-body">
-                        <div class="table-container">
-                            <table class="data-table">
+                        <div class="table-container" style="margin-bottom:16px;">
+                            <table class="data-table" id="askBaseStatsTable">
                                 <thead>
                                     <tr>
-                                        <th>Корзины (Базовые)</th>
-                                        <th>Заказы (Базовые)</th>
-                                        <th>Корзины (Ас.К)</th>
-                                        <th>Заказы, шт (Ас.К)</th>
-                                        <th>Заказы, руб (Ас.К)</th>
+                                        <th>ID кампании</th>
+                                        <th>Артикул</th>
+                                        <th>Ср. позиция</th>
+                                        <th>Затраты</th>
+                                        <th>Заказы, руб</th>
+                                        <th>Показы</th>
+                                        <th>Клики</th>
+                                        <th>Корзины</th>
+                                        <th>Заказы, шт</th>
+                                        <th>CTR</th>
+                                        <th>CR</th>
+                                        <th>CPM</th>
+                                        <th>CPC</th>
+                                        <th>CPO</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="askBaseStatsBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table" id="askAssocTable">
+                                <thead>
                                     <tr>
-                                        <td id="askAtbsBase">-</td>
-                                        <td id="askOrdersBase">-</td>
-                                        <td id="askAssociatedAtbs">-</td>
-                                        <td id="askAssociatedGoods">-</td>
-                                        <td id="askAssociatedPrice">-</td>
+                                        <th>ID кампании</th>
+                                        <th>Артикул</th>
+                                        <th>Заказов на сумму</th>
+                                        <th>Корзины</th>
+                                        <th>Заказы, шт</th>
                                     </tr>
-                                </tbody>
+                                </thead>
+                                <tbody id="askAssocBody"></tbody>
                             </table>
                         </div>
                         <div class="actions">
@@ -229,34 +244,7 @@
                         </div>
                     </div>
                 
-                <div id="askAssociatedDetails" style="display: none;">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Детализация ассоциированных конверсий</h4>
-                            <div id="askCopyDetailsSuccess" class="success-message">Таблица скопирована в буфер обмена!</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-container">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Артикул</th>
-                                            <th>Корзины</th>
-                                            <th>Товары</th>
-                                            <th>Заказы</th>
-                                            <th>Сумма, руб</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="askAssociatedDetailsBody">
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="actions">
-                                <button id="askCopyDetailsData" class="btn btn-secondary">Копировать таблицу</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div id="askAssociatedDetails" style="display: none;"></div>
                 
                 <button id="askToggleRaw" class="btn btn-ghost">Показать сырые данные</button>
             </div>

@@ -103,10 +103,8 @@ function initAskTab() {
         askCopyResultsToClipboard();
     });
     
-    // Кнопка для копирования детализированной таблицы
-    document.getElementById('askCopyDetailsData').addEventListener('click', function() {
-        askCopyDetailsTableToClipboard();
-    });
+    // Кнопка для копирования детализированной таблицы (удалено в новой версии UI)
+    // оставлено пустым для обратной совместимости
 
     // Кнопка для копирования итогов по ID кампаний (если есть)
     const copyPerCampaignBtn = document.getElementById('askCopyPerCampaign');
@@ -237,24 +235,59 @@ function askShowCopyDetailsSuccess() {
     }, 2000);
 }
 
-// Функция для копирования результатов АСК в буфер обмена
+// Функция для копирования результатов АСК в буфер обмена (обе таблицы)
 function askCopyResultsToClipboard() {
-    const atbsBaseValue = document.getElementById('askAtbsBase').textContent;
-    const ordersBaseValue = document.getElementById('askOrdersBase').textContent;
-    const associatedAtbsValue = document.getElementById('askAssociatedAtbs').textContent;
-    const associatedGoodsValue = document.getElementById('askAssociatedGoods').textContent;
-    const associatedPriceValue = document.getElementById('askAssociatedPrice').textContent;
+    const baseTable = document.getElementById('askBaseStatsBody');
+    const assocTable = document.getElementById('askAssocBody');
     
-    // Убираем знак валюты и другие символы форматирования
-    const cleanPrice = associatedPriceValue.replace(/[^\d\-,.]/g, '');
+    if (!baseTable || !assocTable) {
+        askShowError('Таблицы не найдены');
+        return;
+    }
     
-    // Форматируем данные в формате для вставки в таблицу (TSV - Tab Separated Values)
-    const dataToCopy = `${atbsBaseValue}\t${ordersBaseValue}\t${associatedAtbsValue}\t${associatedGoodsValue}\t${cleanPrice}`;
+    let dataToCopy = '';
+    
+    // Заголовок для базовой таблицы
+    dataToCopy += 'БАЗОВАЯ СТАТИСТИКА\n';
+    dataToCopy += 'ID кампании\tАртикул\tСр. позиция\tЗатраты\tЗаказы, руб\tПоказы\tКлики\tКорзины\tЗаказы, шт\tCTR\tCR\tCPM\tCPC\tCPO\n';
+    
+    // Данные базовой таблицы
+    for (const row of baseTable.children) {
+        const cells = row.children;
+        if (cells.length >= 14) {
+            const rowData = [];
+            for (let i = 0; i < 14; i++) {
+                const cellText = cells[i].textContent.trim();
+                // Очищаем форматирование из числовых значений
+                const cleanValue = cellText.replace(/\s/g, '').replace(/,/g, '.');
+                rowData.push(cleanValue);
+            }
+            dataToCopy += rowData.join('\t') + '\n';
+        }
+    }
+    
+    // Разделитель между таблицами
+    dataToCopy += '\nАССОЦИИРОВАННЫЕ КОНВЕРСИИ\n';
+    dataToCopy += 'ID кампании\tАртикул\tЗаказов на сумму\tКорзины\tЗаказы, шт\n';
+    
+    // Данные ассоциированной таблицы
+    for (const row of assocTable.children) {
+        const cells = row.children;
+        if (cells.length >= 5) {
+            const cid = cells[0].textContent.trim();
+            const articul = cells[1].textContent.trim();
+            const sumRaw = cells[2].textContent.trim();
+            const baskets = cells[3].textContent.trim();
+            const orders = cells[4].textContent.trim();
+            const sumClean = sumRaw.replace(/\s/g, '').replace(/,/g, '.');
+            dataToCopy += `${cid}\t${articul}\t${sumClean}\t${baskets}\t${orders}\n`;
+        }
+    }
     
     // Копируем в буфер обмена
     navigator.clipboard.writeText(dataToCopy)
         .then(() => {
-            console.log('Данные АСК скопированы в буфер обмена:', dataToCopy);
+            console.log('Обе таблицы АСК скопированы в буфер обмена');
             askShowCopySuccess();
         })
         .catch(err => {
@@ -345,7 +378,7 @@ function askFetchSingleStatsData(advertId, dateFrom, dateTo) {
         fetchButton.textContent = originalText;
         fetchButton.disabled = false;
 
-        // Обычный одиночный режим: показываем основную сводку
+        // Обычный одиночный режим: показываем основную сводку с двумя таблицами
         const headerEl = document.getElementById('askResultsHeader');
         if (headerEl) headerEl.textContent = 'Результаты анализа';
         const mainCard = document.getElementById('askMainSummaryCard');
@@ -432,12 +465,110 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
 
             if (Array.isArray(unified.content.nmStats)) {
                 unified.content.nmStats.forEach((item) => {
-                    const key = String(item.nm_id || item.nmId || 'unknown');
-                    if (!nmStatsMap[key]) {
-                        nmStatsMap[key] = { nm_id: key, name: item.name || '', atbs: 0, sum_price: 0 };
+                    // Проверяем, есть ли imt_nm_stats (вариации товара)
+                    if (item.imt_nm_stats && Array.isArray(item.imt_nm_stats) && item.imt_nm_stats.length > 0) {
+                        // Если есть вариации, обрабатываем каждую
+                        item.imt_nm_stats.forEach((variation) => {
+                            const key = String(variation.nm_id || variation.nmId || 'unknown');
+                            if (!nmStatsMap[key]) {
+                                nmStatsMap[key] = { 
+                                    nm_id: key, 
+                                    name: variation.name || item.name || '', 
+                                    atbs: 0, 
+                                    sum_price: 0,
+                                    views: 0,
+                                    clicks: 0,
+                                    shks: 0,
+                                    spend: 0,
+                                    avg_position: 0,
+                                    ctr: 0,
+                                    cr: 0,
+                                    cpm: 0,
+                                    cpc: 0,
+                                    cpo: 0,
+                                    advert_ids: []
+                                };
+                            }
+                            nmStatsMap[key].atbs += (variation.atbs || 0);
+                            nmStatsMap[key].sum_price += (variation.sum_price || 0);
+                            nmStatsMap[key].views += (variation.views || 0);
+                            nmStatsMap[key].clicks += (variation.clicks || 0);
+                            nmStatsMap[key].shks += (variation.shks || 0);
+                            nmStatsMap[key].spend += (variation.spend || 0);
+                            // Для avg_position берем среднее значение
+                            if (variation.avg_position != null) {
+                                nmStatsMap[key].avg_position = (nmStatsMap[key].avg_position + variation.avg_position) / 2;
+                            }
+                            // Для метрик эффективности берем среднее
+                            if (variation.ctr != null) {
+                                nmStatsMap[key].ctr = (nmStatsMap[key].ctr + variation.ctr) / 2;
+                            }
+                            if (variation.cr != null) {
+                                nmStatsMap[key].cr = (nmStatsMap[key].cr + variation.cr) / 2;
+                            }
+                            if (variation.cpm != null) {
+                                nmStatsMap[key].cpm = (nmStatsMap[key].cpm + variation.cpm) / 2;
+                            }
+                            if (variation.cpc != null) {
+                                nmStatsMap[key].cpc = (nmStatsMap[key].cpc + variation.cpc) / 2;
+                            }
+                            if (variation.cpo != null) {
+                                nmStatsMap[key].cpo = (nmStatsMap[key].cpo + variation.cpo) / 2;
+                            }
+                            if (nmStatsMap[key].advert_ids.indexOf(id) === -1) {
+                                nmStatsMap[key].advert_ids.push(id);
+                            }
+                        });
+                    } else {
+                        // Если нет вариаций, используем основной объект
+                        const key = String(item.nm_id || item.nmId || 'unknown');
+                        if (!nmStatsMap[key]) {
+                            nmStatsMap[key] = { 
+                                nm_id: key, 
+                                name: item.name || '', 
+                                atbs: 0, 
+                                sum_price: 0,
+                                views: 0,
+                                clicks: 0,
+                                shks: 0,
+                                spend: 0,
+                                avg_position: 0,
+                                ctr: 0,
+                                cr: 0,
+                                cpm: 0,
+                                cpc: 0,
+                                cpo: 0,
+                                advert_ids: []
+                            };
+                        }
+                        nmStatsMap[key].atbs += (item.atbs || 0);
+                        nmStatsMap[key].sum_price += (item.sum_price || 0);
+                        nmStatsMap[key].views += (item.views || 0);
+                        nmStatsMap[key].clicks += (item.clicks || 0);
+                        nmStatsMap[key].shks += (item.shks || 0);
+                        nmStatsMap[key].spend += (item.spend || 0);
+                        if (item.avg_position != null) {
+                            nmStatsMap[key].avg_position = (nmStatsMap[key].avg_position + item.avg_position) / 2;
+                        }
+                        if (item.ctr != null) {
+                            nmStatsMap[key].ctr = (nmStatsMap[key].ctr + item.ctr) / 2;
+                        }
+                        if (item.cr != null) {
+                            nmStatsMap[key].cr = (nmStatsMap[key].cr + item.cr) / 2;
+                        }
+                        if (item.cpm != null) {
+                            nmStatsMap[key].cpm = (nmStatsMap[key].cpm + item.cpm) / 2;
+                        }
+                        if (item.cpc != null) {
+                            nmStatsMap[key].cpc = (nmStatsMap[key].cpc + item.cpc) / 2;
+                        }
+                        if (item.cpo != null) {
+                            nmStatsMap[key].cpo = (nmStatsMap[key].cpo + item.cpo) / 2;
+                        }
+                        if (nmStatsMap[key].advert_ids.indexOf(id) === -1) {
+                            nmStatsMap[key].advert_ids.push(id);
+                        }
                     }
-                    nmStatsMap[key].atbs += (item.atbs || 0);
-                    nmStatsMap[key].sum_price += (item.sum_price || 0);
                 });
             }
 
@@ -445,12 +576,15 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                 unified.content.sideNmStats.forEach((item) => {
                     const key = String(item.nm_id || item.nmId || 'unknown');
                     if (!sideNmStatsMap[key]) {
-                        sideNmStatsMap[key] = { nm_id: key, name: item.name || '', atbs: 0, orders: 0, shks: 0, sum_price: 0 };
+                        sideNmStatsMap[key] = { nm_id: key, name: item.name || '', atbs: 0, orders: 0, shks: 0, sum_price: 0, advert_ids: [] };
                     }
                     sideNmStatsMap[key].atbs += (item.atbs || 0);
                     sideNmStatsMap[key].orders += (item.orders || 0);
                     sideNmStatsMap[key].shks += (item.shks || 0);
                     sideNmStatsMap[key].sum_price += (item.sum_price || 0);
+                    if (sideNmStatsMap[key].advert_ids.indexOf(id) === -1) {
+                        sideNmStatsMap[key].advert_ids.push(id);
+                    }
                 });
             }
 
@@ -459,8 +593,18 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
             let goodsNm = 0;
             if (Array.isArray(unified.content.nmStats)) {
                 unified.content.nmStats.forEach((it) => {
-                    atbsNm += (it.atbs || 0);
-                    goodsNm += (it.shks || 0);
+                    // Проверяем, есть ли imt_nm_stats (вариации товара)
+                    if (it.imt_nm_stats && Array.isArray(it.imt_nm_stats) && it.imt_nm_stats.length > 0) {
+                        // Если есть вариации, суммируем данные из них
+                        it.imt_nm_stats.forEach((variation) => {
+                            atbsNm += (variation.atbs || 0);
+                            goodsNm += (variation.shks || 0);
+                        });
+                    } else {
+                        // Если нет вариаций, используем основной объект
+                        atbsNm += (it.atbs || 0);
+                        goodsNm += (it.shks || 0);
+                    }
                 });
             }
             let assocAtbs = 0, assocGoods = 0, assocPrice = 0;
@@ -500,14 +644,11 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
         aggregated.content.sideNmStats = Object.values(sideNmStatsMap);
 
         askDisplayRawData({ items: rawPerId });
-        // Не показываем общий агрегат как "Результаты анализа" при множественном режиме,
-        // вместо этого заполним пер-кампанийную таблицу и скорректируем заголовок/видимость
+        // В новой версии отображаем агрегированные таблицы внутри основного блока
         const headerEl = document.getElementById('askResultsHeader');
-        if (headerEl) headerEl.textContent = 'Результаты анализа (по ID кампаний)';
+        if (headerEl) headerEl.textContent = 'Результаты анализа (агрегировано)';
         const mainCard = document.getElementById('askMainSummaryCard');
-        if (mainCard) mainCard.style.display = 'none';
-        // В множественном режиме всё равно показываем нижнюю детализацию асс. конверсий (по сумме)
-        // поэтому после отрисовки агрегата вручную включим блок и заполним его суммарными sideNmStats
+        if (mainCard) mainCard.style.display = 'block';
 
         // Отобразим итоги по каждому ID
         try {
@@ -529,14 +670,12 @@ async function askFetchMultipleStatsData(idList, dateFrom, dateTo) {
                 });
                 container.style.display = perCampaign.length > 0 ? 'block' : 'none';
             }
-            // Отрисуем агрегированную детализацию снизу
-            const detailsContainer = document.getElementById('askAssociatedDetails');
-            if (detailsContainer) {
-                detailsContainer.style.display = 'block';
-            }
-            // Сконструируем aggregated из карт для использования в askPopulateAssociatedDetailsTable
-            const aggregatedForDetails = { content: { sideNmStats: Object.values(sideNmStatsMap) } };
-            askPopulateAssociatedDetailsTable(aggregatedForDetails.content.sideNmStats);
+            // Заполним таблицы в основной карточке
+            askFillBaseAndAssocTables({
+                advertId: '—',
+                nmStats: aggregated.content.nmStats,
+                sideNmStats: aggregated.content.sideNmStats
+            });
         } catch (e) {
             console.warn('Не удалось отобразить итоги по ID кампаний:', e);
         }
@@ -651,20 +790,12 @@ function askProcessData(data) {
         sideNmStatsLength: content.sideNmStats ? content.sideNmStats.length : 0
     });
     
-    // Отображение результатов в таблице (с защитой на отсутствие элементов)
-    const fmt = new Intl.NumberFormat('ru-RU');
-    const askSetText = (id, value) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = String(value);
-    };
-    askSetText('askAtbsBase', totalAtbsNmStats);
-    askSetText('askOrdersBase', totalOrdersNmStats);
-    askSetText('askAssociatedAtbs', associatedAtbs);
-    askSetText('askAssociatedGoods', associatedGoods);
-    askSetText('askAssociatedPrice', fmt.format(associatedPrice));
-    
-    // Заполнение детализированной таблицы ассоциированных конверсий
-    askPopulateAssociatedDetailsTable(content.sideNmStats || []);
+    // Заполнение новых таблиц
+    askFillBaseAndAssocTables({
+        advertId: (data && data.content && data.content.advertId) || (data && data.advertId) || '—',
+        nmStats: content.nmStats || [],
+        sideNmStats: content.sideNmStats || []
+    });
 }
 
 // Функция для преобразования данных из нового API v5/fullstat в старый формат для АСК
@@ -673,6 +804,7 @@ function askConvertApiV5DataToOldFormat(apiData) {
     
     const result = {
         content: {
+            advertId: apiData.advertId || apiData.advert_id || apiData.id || undefined,
             nmStats: [],
             sideNmStats: [],
             sum_price: 0
@@ -748,47 +880,100 @@ function askConvertApiV5DataToOldFormat(apiData) {
     return result;
 }
 
-// Функция для заполнения таблицы с детализацией ассоциированных конверсий АСК
-function askPopulateAssociatedDetailsTable(sideNmStats) {
-    const tableBody = document.getElementById('askAssociatedDetailsBody');
-    const detailsContainer = document.getElementById('askAssociatedDetails');
-    
-    // Очищаем таблицу
-    tableBody.innerHTML = '';
-    
-    if (!sideNmStats || sideNmStats.length === 0) {
-        // Если нет данных, скрываем таблицу
-        detailsContainer.style.display = 'none';
-        return;
+// Заполнение двух таблиц: базовая статистика и ассоциированные конверсии
+function askFillBaseAndAssocTables({ advertId, nmStats, sideNmStats }) {
+    const baseBody = document.getElementById('askBaseStatsBody');
+    const assocBody = document.getElementById('askAssocBody');
+    if (baseBody) baseBody.innerHTML = '';
+    if (assocBody) assocBody.innerHTML = '';
+
+    const fmt = new Intl.NumberFormat('ru-RU');
+
+    // Базовая таблица: обрабатываем nmStats с учетом imt_nm_stats
+    if (baseBody && Array.isArray(nmStats)) {
+        nmStats.forEach((item) => {
+            const idCellValue = (advertId && advertId !== '—')
+                ? advertId
+                : (item.advert_ids && item.advert_ids.length ? item.advert_ids.join(', ') : '—');
+            // Проверяем, есть ли imt_nm_stats (вариации товара)
+            if (item.imt_nm_stats && Array.isArray(item.imt_nm_stats) && item.imt_nm_stats.length > 0) {
+                // Если есть вариации, добавляем каждую как отдельную строку
+                item.imt_nm_stats.forEach((variation) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${idCellValue}</td>
+                        <td>${variation.nm_id || ''}</td>
+                        <td>${variation.avg_position != null ? variation.avg_position : ''}</td>
+                        <td>${variation.spend != null ? fmt.format(variation.spend) : ''}</td>
+                        <td>${variation.sum_price != null ? fmt.format(variation.sum_price) : ''}</td>
+                        <td>${variation.views != null ? variation.views : ''}</td>
+                        <td>${variation.clicks != null ? variation.clicks : ''}</td>
+                        <td>${variation.atbs != null ? variation.atbs : 0}</td>
+                        <td>${variation.shks != null ? variation.shks : ''}</td>
+                        <td>${variation.ctr != null ? variation.ctr : ''}</td>
+                        <td>${variation.cr != null ? variation.cr : ''}</td>
+                        <td>${variation.cpm != null ? variation.cpm : ''}</td>
+                        <td>${variation.cpc != null ? variation.cpc : ''}</td>
+                        <td>${variation.cpo != null ? variation.cpo : ''}</td>
+                    `;
+                    baseBody.appendChild(row);
+                });
+            } else {
+                // Если нет вариаций, используем основной объект
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${idCellValue}</td>
+                    <td>${item.nm_id || ''}</td>
+                    <td>${item.avg_position != null ? item.avg_position : ''}</td>
+                    <td>${item.spend != null ? fmt.format(item.spend) : ''}</td>
+                    <td>${item.sum_price != null ? fmt.format(item.sum_price) : ''}</td>
+                    <td>${item.views != null ? item.views : ''}</td>
+                    <td>${item.clicks != null ? item.clicks : ''}</td>
+                    <td>${item.atbs != null ? item.atbs : 0}</td>
+                    <td>${item.shks != null ? item.shks : ''}</td>
+                    <td>${item.ctr != null ? item.ctr : ''}</td>
+                    <td>${item.cr != null ? item.cr : ''}</td>
+                    <td>${item.cpm != null ? item.cpm : ''}</td>
+                    <td>${item.cpc != null ? item.cpc : ''}</td>
+                    <td>${item.cpo != null ? item.cpo : ''}</td>
+                `;
+                baseBody.appendChild(row);
+            }
+        });
     }
-    
-    // Показываем контейнер с таблицей
-    detailsContainer.style.display = 'block';
-    
-    // Сортируем по убыванию суммы для наглядности
+
+    // Ассоциированная таблица: используем уже существующую функцию заполнения
+    askPopulateAssociatedDetailsTable(sideNmStats || [], advertId);
+}
+
+// Функция для заполнения таблицы с детализацией ассоциированных конверсий АСК
+function askPopulateAssociatedDetailsTable(sideNmStats, advertId) {
+    // Заполняем новую таблицу ассоциированных конверсий в основной карточке
+    const assocBody = document.getElementById('askAssocBody');
+    if (!assocBody) return;
+    assocBody.innerHTML = '';
+    if (!sideNmStats || sideNmStats.length === 0) return;
     const sortedStats = sideNmStats.sort((a, b) => (b.sum_price || 0) - (a.sum_price || 0));
-    
-    // Заполняем таблицу
+    const fmt = new Intl.NumberFormat('ru-RU');
     sortedStats.forEach(item => {
-        const row = document.createElement('tr');
-        
-        row.innerHTML = `
+        const idCell = (item.advert_ids && item.advert_ids.length)
+            ? item.advert_ids.join(', ')
+            : (advertId || '—');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${idCell}</td>
             <td>${item.nm_id}</td>
+            <td>${fmt.format(item.sum_price || 0)}</td>
             <td>${item.atbs || 0}</td>
-            <td>${item.orders || 0}</td>
-            <td>${new Intl.NumberFormat('ru-RU').format(item.sum_price || 0)}</td>
+            <td>${item.shks || 0}</td>
         `;
-        
-        tableBody.appendChild(row);
+        assocBody.appendChild(tr);
     });
-    
-    console.log('Детализированная таблица АСК заполнена:', sortedStats.length, 'артикулов');
 }
 
 // Функция для копирования детализированной таблицы АСК в буфер обмена
 function askCopyDetailsTableToClipboard() {
-    const tableBody = document.getElementById('askAssociatedDetailsBody');
-    
+    const tableBody = document.getElementById('askAssocBody');
     if (!tableBody || tableBody.children.length === 0) {
         askShowError('Нет данных для копирования');
         return;
@@ -798,24 +983,22 @@ function askCopyDetailsTableToClipboard() {
     let tableData = [];
     
     // Добавляем заголовки
-    tableData.push('Артикул\tКорзины\tТовары\tЗаказы\tСумма, руб');
+    tableData.push('ID кампании\tАртикул\tЗаказов на сумму\tКорзины\tЗаказы, шт');
     
     // Проходим по всем строкам таблицы
     for (let row of tableBody.children) {
         const cells = row.children;
         if (cells.length >= 5) {
             // Извлекаем данные из ячеек
-            const articul = cells[0].textContent.trim();
-            const baskets = cells[1].textContent.trim();
-            const goods = cells[2].textContent.trim();
-            const orders = cells[3].textContent.trim();
-            const sumRaw = cells[4] ? cells[4].textContent.trim() : '';
-            
-            // Убираем форматирование из суммы (пробелы, запятые оставляем только цифры и точки)
+            const cid = cells[0].textContent.trim();
+            const articul = cells[1].textContent.trim();
+            const sumRaw = cells[2].textContent.trim();
+            const baskets = cells[3].textContent.trim();
+            const orders = cells[4].textContent.trim();
             const sumClean = sumRaw.replace(/\s/g, '').replace(/,/g, '.');
             
             // Добавляем строку данных (разделители - табуляция)
-            tableData.push(`${articul}\t${baskets}\t${goods}\t${orders}\t${sumClean}`);
+            tableData.push(`${cid}\t${articul}\t${sumClean}\t${baskets}\t${orders}`);
         }
     }
     
