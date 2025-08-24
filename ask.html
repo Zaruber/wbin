@@ -3,34 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WBin — Анализ АСК</title>
-    <link rel="stylesheet" href="popup.css">
+    <title>Анализ АСК - WBin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ask.css">
 </head>
-<body class="ask-page">
+<body>
     <div class="container">
-        <div class="header">
-            <div class="app-info">
-                <div class="app-icon">
-                    <img src="48.png" alt="WBin">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="app-info">
+                    <div class="app-icon">
+                        <img src="48.png" alt="WBin">
+                    </div>
+                    <div class="app-details">
+                        <h1 class="app-name">WBin</h1>
+                        <span class="app-version">Анализ АСК</span>
+                    </div>
                 </div>
-                <div class="app-details">
-                    <h1 class="app-name">WBin</h1>
-                    <span class="app-version">v1.4</span>
+                <div class="header-actions">
+                    <a href="https://t.me/+3g9fjC4OTn03MWYx" target="_blank" class="telegram-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.05-.2-.06-.06-.14-.04-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.75-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                        </svg>
+                        <span>Telegram</span>
+                    </a>
+                    <a href="https://github.com/Zaruber/wbin" target="_blank" class="github-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        <span>GitHub</span>
+                    </a>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div class="content" id="ask-page">
-            <div class="ask-toolbar">
-                <div class="ask-toolbar-row">
-                    <div class="form-group" style="flex:2;">
-                        <label for="askAdvertId">ID рекламы (можно несколько)</label>
-                        <input type="text" id="askAdvertId" placeholder="Например: 25033325, 25033326 25033327" class="form-input">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-section">
+                    <div class="info-banner">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        <span>Необходима авторизация в <a href="https://cmp.wildberries.ru/" target="_blank">ЛК Wildberries</a></span>
                     </div>
-                    <div class="form-row" style="flex:1;">
+                </div>
+                
+                <div class="toolbar-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="askAdvertId">ID рекламы</label>
+                            <input type="text" id="askAdvertId" placeholder="Например: 25033325, 25033326 25033327" class="form-input">
+                            <div class="form-hint">Можно указать несколько ID через запятую, пробел или перенос строки</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="askDateFrom">Дата с</label>
                             <input type="date" id="askDateFrom" class="form-input">
@@ -40,120 +72,156 @@
                             <input type="date" id="askDateTo" class="form-input">
                         </div>
                     </div>
-                    <div class="actions" style="flex-shrink:0;">
-                        <button id="askFetchData" class="btn btn-primary btn-icon" title="Получить данные" aria-label="Получить данные">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M12 3a1 1 0 0 1 1 1v8.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 1.414-1.414L11 12.586V4a1 1 0 0 1 1-1z"></path>
-                                <path d="M5 20a2 2 0 0 1-2-2v-2a1 1 0 1 1 2 0v2h14v-2a1 1 0 1 1 2 0v2a2 2 0 0 1-2 2H5z"></path>
+                    
+                    <div class="toolbar-actions">
+                        <button id="askAuthWb" class="btn btn-secondary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                             </svg>
+                            Авторизация WB
+                        </button>
+                        <button id="askFetchData" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                            </svg>
+                            Получить данные
                         </button>
                     </div>
                 </div>
-                <div id="askError" class="error-message"></div>
             </div>
 
-            <div class="ask-layout">
-                <div class="ask-col-left">
-                    <div id="askPerCampaignSummary" style="display: none;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Итоги по ID кампаний</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-container">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>ID Кампании</th>
-                                                <th>Корзины (Базовые)</th>
-                                                <th>Заказы (Базовые)</th>
-                                                <th>Корзины (Ас.К)</th>
-                                                <th>Заказы, шт (Ас.К)</th>
-                                                <th>Заказы, руб (Ас.К)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="askPerCampaignSummaryBody"></tbody>
-                                    </table>
-                                </div>
-                                <div class="actions">
-                                    <button id="askCopyPerCampaign" class="btn btn-secondary">Копировать итоги</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Error Message -->
+            <div id="askError" class="error-message"></div>
 
-                    <div id="askProgressCard" style="display: none;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Прогресс парсинга</h4>
-                            </div>
-                            <div class="card-body">
-                                <ul id="askProgressList" class="progress-list" style="margin:0; padding-left:18px;"></ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button id="askToggleRaw" class="btn btn-ghost">Показать сырые данные</button>
-                    <div id="askRawData" class="raw-data"></div>
+            <!-- Progress Card -->
+            <div id="askProgressCard" class="card progress-card" style="display: none;">
+                <div class="card-header">
+                    <h3>Прогресс парсинга</h3>
                 </div>
+                <div class="card-body">
+                    <ul id="askProgressList" class="progress-list"></ul>
+                </div>
+            </div>
 
-                <div class="ask-col-right">
-                    <div id="askResults" style="display: none;">
-                        <div class="card" id="askMainSummaryCard">
-                            <div class="card-header">
-                                <h3 id="askResultsHeader">Результаты анализа</h3>
-                                <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-container" style="margin-bottom:16px;">
-                                    <table class="data-table" id="askBaseStatsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>ID кампании</th>
-                                                <th>Артикул</th>
-                                                <th>Ср. позиция</th>
-                                                <th>Затраты</th>
-                                                <th>Заказы, руб</th>
-                                                <th>Показы</th>
-                                                <th>Клики</th>
-                                                <th>Корзины</th>
-                                                <th>Заказы, шт</th>
-                                                <th>CTR</th>
-                                                <th>CR</th>
-                                                <th>CPM</th>
-                                                <th>CPC</th>
-                                                <th>CPO</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="askBaseStatsBody"></tbody>
-                                    </table>
-                                </div>
-                                <div class="table-container">
-                                    <table class="data-table" id="askAssocTable">
-                                        <thead>
-                                            <tr>
-                                                <th>ID кампании</th>
-                                                <th>Артикул</th>
-                                                <th>Заказов на сумму</th>
-                                                <th>Корзины</th>
-                                                <th>Заказы, шт</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="askAssocBody"></tbody>
-                                    </table>
-                                </div>
-                                <div class="actions">
-                                    <button id="askCopyData" class="btn btn-secondary">Копировать данные</button>
-                                </div>
-                            </div>
+            <!-- Results -->
+            <div id="askResults" class="results-container" style="display: none;">
+                <!-- Main Summary Card -->
+                <div class="card main-summary-card" id="askMainSummaryCard">
+                    <div class="card-header">
+                        <h3 id="askResultsHeader">Результаты анализа</h3>
+                        <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table" id="askBaseStatsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID кампании</th>
+                                        <th>Артикул</th>
+                                        <th>Ср. позиция</th>
+                                        <th>Затраты</th>
+                                        <th>Заказы, руб</th>
+                                        <th>Показы</th>
+                                        <th>Клики</th>
+                                        <th>Корзины</th>
+                                        <th>Заказы, шт</th>
+                                        <th>CTR</th>
+                                        <th>CR</th>
+                                        <th>CPM</th>
+                                        <th>CPC</th>
+                                        <th>CPO</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="askBaseStatsBody"></tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="data-table" id="askAssocTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID кампании</th>
+                                        <th>Артикул</th>
+                                        <th>Заказов на сумму</th>
+                                        <th>Корзины</th>
+                                        <th>Заказы, шт</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="askAssocBody"></tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="actions">
+                            <button id="askCopyData" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                </svg>
+                                Копировать данные
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Per Campaign Summary -->
+                <div id="askPerCampaignSummary" class="card" style="display: none;">
+                    <div class="card-header">
+                        <h3>Итоги по ID кампаний</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID Кампании</th>
+                                        <th>Корзины (Базовые)</th>
+                                        <th>Заказы (Базовые)</th>
+                                        <th>Корзины (Ас.К)</th>
+                                        <th>Заказы, шт (Ас.К)</th>
+                                        <th>Заказы, руб (Ас.К)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="askPerCampaignSummaryBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="actions">
+                            <button id="askCopyPerCampaign" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                </svg>
+                                Копировать итоги
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Associated Details -->
+                <div id="askAssociatedDetails" style="display: none;"></div>
+                
+                <!-- Raw Data Toggle -->
+                <button id="askToggleRaw" class="btn btn-ghost">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Показать сырые данные
+                </button>
             </div>
-        </div>
+            
+            <!-- Raw Data -->
+            <div id="askRawData" class="raw-data"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <span>Создано</span>
+                    <a href="https://t.me/real_zaruber" target="_blank" class="author-link">@zaruber</a>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <script src="popup.js"></script>
+    <script src="ask.js"></script>
 </body>
 </html>
 

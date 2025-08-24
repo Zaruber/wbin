@@ -128,128 +128,31 @@
                         Необходима авторизация в <a href="https://cmp.wildberries.ru/" target="_blank">ЛК Wildberries</a>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="askAdvertId">ID рекламы (можно несколько)</label>
-                        <input type="text" id="askAdvertId" placeholder="Например: 25033325, 25033326 25033327" class="form-input">
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="askDateFrom">Дата с</label>
-                            <input type="date" id="askDateFrom" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="askDateTo">Дата по</label>
-                            <input type="date" id="askDateTo" class="form-input">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <p>Убедитесь, что вы авторизованы в <a href="https://cmp.wildberries.ru/" target="_blank">ЛК Wildberries</a></p>
                         </div>
                     </div>
                     
-                    <div class="actions">
-                        <button id="askAuthWb" class="btn btn-secondary">Авторизация WB</button>
-                        <button id="askFetchData" class="btn btn-primary">Получить данные</button>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <p>Нажмите кнопку "Получить отчёт" для открытия расширенного интерфейса анализа АСК</p>
+                        </div>
                     </div>
                     
-                    <div id="askError" class="error-message"></div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <p>В открывшейся вкладке введите ID рекламы и выберите период для анализа</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button id="ask-report-btn" class="btn btn-primary">Получить отчёт</button>
                 </div>
             </div>
-            
-            <div id="askResults" style="display: none;">
-                <div class="card" id="askMainSummaryCard">
-                    <div class="card-header">
-                        <h3 id="askResultsHeader">Результаты анализа</h3>
-                        <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-container" style="margin-bottom:16px;">
-                            <table class="data-table" id="askBaseStatsTable">
-                                <thead>
-                                    <tr>
-                                        <th>ID кампании</th>
-                                        <th>Артикул</th>
-                                        <th>Ср. позиция</th>
-                                        <th>Затраты</th>
-                                        <th>Заказы, руб</th>
-                                        <th>Показы</th>
-                                        <th>Клики</th>
-                                        <th>Корзины</th>
-                                        <th>Заказы, шт</th>
-                                        <th>CTR</th>
-                                        <th>CR</th>
-                                        <th>CPM</th>
-                                        <th>CPC</th>
-                                        <th>CPO</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="askBaseStatsBody"></tbody>
-                            </table>
-                        </div>
-                        <div class="table-container">
-                            <table class="data-table" id="askAssocTable">
-                                <thead>
-                                    <tr>
-                                        <th>ID кампании</th>
-                                        <th>Артикул</th>
-                                        <th>Заказов на сумму</th>
-                                        <th>Корзины</th>
-                                        <th>Заказы, шт</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="askAssocBody"></tbody>
-                            </table>
-                        </div>
-                        <div class="actions">
-                            <button id="askCopyData" class="btn btn-secondary">Копировать данные</button>
-                        </div>
-                    </div>
-                </div>
-
-                    <div id="askProgressCard" style="display: none;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Прогресс парсинга</h4>
-                            </div>
-                            <div class="card-body">
-                                <ul id="askProgressList" class="progress-list" style="margin:0; padding-left:18px;"></ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                    <div id="askPerCampaignSummary" style="display: none;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Итоги по ID кампаний</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-container">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>ID Кампании</th>
-                                                <th>Корзины (Базовые)</th>
-                                                <th>Заказы (Базовые)</th>
-                                                <th>Корзины (Ас.К)</th>
-                                                <th>Заказы, шт (Ас.К)</th>
-                                                <th>Заказы, руб (Ас.К)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="askPerCampaignSummaryBody">
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="actions">
-                                    <button id="askCopyPerCampaign" class="btn btn-secondary">Копировать итоги</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                
-                <div id="askAssociatedDetails" style="display: none;"></div>
-                
-                <button id="askToggleRaw" class="btn btn-ghost">Показать сырые данные</button>
-            </div>
-            
-            <div id="askRawData" class="raw-data"></div>
         </div>
 
         <div class="footer">
