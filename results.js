@@ -254,6 +254,7 @@ function parseStatsDataForTable(data) {
                 
                 // Получаем данные из записи
                 const id = stat.id || 'Н/Д';
+                const campaignName = stat.campaign_name || stat.campaignName || 'Н/Д';
                 
                 // Получаем артикулы
                 let nms = 'Н/Д';
@@ -272,6 +273,7 @@ function parseStatsDataForTable(data) {
                 
                 // Добавляем ячейки с данными
                 row.innerHTML = `
+                    <td>${campaignName}</td>
                     <td>${id}</td>
                     <td>${nms}</td>
                     <td>${views}</td>
@@ -289,6 +291,7 @@ function parseStatsDataForTable(data) {
                 
                 // Добавляем данные в массив для экспорта
                 statsData.push({
+                    campaignName,
                     id,
                     nms,
                     views,
@@ -338,11 +341,11 @@ function copyToClipboard() {
             }
             
             // Формируем строку заголовков для статистики
-            const headers = 'ID Кампании\tАртикулы\tПоказы\tКлики\tCTR (%)\tCPC\tCR (%)\tКорзины\tЗаказы\tЗатраты';
+            const headers = 'Название\tID Кампании\tАртикулы\tПоказы\tКлики\tCTR (%)\tCPC\tCR (%)\tКорзины\tЗаказы\tЗатраты';
             
             // Формируем строки данных с заменой точек на запятые в числовых значениях
             const rows = statsData.map(item => {
-                return `${item.id}\t${item.nms}\t${item.views}\t${item.clicks}\t${String(item.ctr).replace('.', ',')}%\t${String(item.cpc).replace('.', ',')}\t${String(item.cr).replace('.', ',')}%\t${item.atbs}\t${item.orders}\t${String(item.sum).replace('.', ',')}`;
+                return `${item.campaignName}\t${item.id}\t${item.nms}\t${item.views}\t${item.clicks}\t${String(item.ctr).replace('.', ',')}%\t${String(item.cpc).replace('.', ',')}\t${String(item.cr).replace('.', ',')}%\t${item.atbs}\t${item.orders}\t${String(item.sum).replace('.', ',')}`;
             });
             
             // Объединяем всё в одну строку с разделителями строк
@@ -402,7 +405,7 @@ function exportToExcel() {
             
             // Используем точку с запятой в качестве разделителя для лучшей совместимости с Excel
             // Создаем заголовки
-            const headers = ['ID Кампании', 'Артикулы', 'Показы', 'Клики', 'CTR (%)', 'CPC', 'CR (%)', 'Корзины', 'Заказы', 'Затраты'];
+            const headers = ['Название', 'ID Кампании', 'Артикулы', 'Показы', 'Клики', 'CTR (%)', 'CPC', 'CR (%)', 'Корзины', 'Заказы', 'Затраты'];
             
             // Подготавливаем BOM (Byte Order Mark) для корректного отображения кириллицы в Excel
             const BOM = '\uFEFF';
@@ -415,6 +418,7 @@ function exportToExcel() {
                 // Заменяем точки на запятые в числовых значениях для правильного отображения в русской локализации Excel
                 // И добавляем префикс к значениям CTR, CPC и CR, чтобы предотвратить их интерпретацию как даты
                 const values = [
+                    item.campaignName,
                     item.id,
                     item.nms,
                     item.views,
