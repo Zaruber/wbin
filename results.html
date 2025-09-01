@@ -122,6 +122,13 @@
         }
         #stats-table { display: none; }
         #campaigns-table { display: none; }
+        /* Панель выбора столбцов */
+        .columns-panel { position: absolute; right: 0; top: 44px; background: #fff; border: 1px solid rgba(60,60,67,0.12); border-radius: 10px; box-shadow: 0 8px 24px rgba(17,17,17,0.08); padding: 12px; display: none; min-width: 220px; z-index: 1000; }
+        .columns-panel.show { display: block; }
+        .columns-panel h4 { margin: 0 0 8px 0; font-size: 13px; color: #111827; }
+        .columns-list { display: grid; grid-template-columns: 1fr; gap: 6px; max-height: 260px; overflow: auto; }
+        .columns-list label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #111827; }
+        .relative { position: relative; }
     </style>
 </head>
 <body>
@@ -138,7 +145,7 @@
         <div class="table-container">
             <div class="section-header">
                 <h2 class="section-title" id="table-title">Таблица данных</h2>
-                <div class="action-buttons">
+                <div class="action-buttons relative">
                     <button id="copy-btn" class="btn btn-secondary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
@@ -152,6 +159,11 @@
                         </svg>
                         Экспорт в Excel
                     </button>
+                    <button id="columns-btn" class="btn btn-secondary" title="Настроить столбцы">Столбцы</button>
+                    <div id="columns-panel" class="columns-panel">
+                        <h4>Отображаемые столбцы</h4>
+                        <div id="columns-list" class="columns-list"></div>
+                    </div>
                 </div>
             </div>
             <div id="table-view">

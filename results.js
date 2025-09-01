@@ -7,6 +7,9 @@ const tableBodyElement = document.getElementById('table-body');
 const statsTableBodyElement = document.getElementById('stats-table-body');
 const copyButton = document.getElementById('copy-btn');
 const excelButton = document.getElementById('excel-btn');
+const columnsButton = document.getElementById('columns-btn');
+const columnsPanel = document.getElementById('columns-panel');
+const columnsList = document.getElementById('columns-list');
 const successMessage = document.getElementById('success-message');
 const jsonContainer = document.querySelector('.json-container');
 const tableContainer = document.querySelector('.table-container');
@@ -72,6 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Добавляем обработчики событий для кнопок
     copyButton.addEventListener('click', copyToClipboard);
     excelButton.addEventListener('click', exportToExcel);
+    if (columnsButton) {
+        columnsButton.addEventListener('click', toggleColumnsPanel);
+    }
 });
 
 // Функция для настройки режима отображения (статистика или обычный)
@@ -331,21 +337,115 @@ function parseStatsDataForTable(data) {
     }
 }
 
+// ======== Настройка столбцов ========
+function toggleColumnsPanel() {
+    if (!columnsPanel) return;
+    const willShow = !columnsPanel.classList.contains('show');
+    if (willShow) buildColumnsList();
+    columnsPanel.classList.toggle('show', willShow);
+}
+
+function buildColumnsList() {
+    if (!columnsList) return;
+    columnsList.innerHTML = '';
+    const currentTable = isStatsMode ? document.getElementById('stats-data-table') : document.getElementById('data-table');
+    if (!currentTable) return;
+    const headers = Array.from(currentTable.querySelectorAll('thead th'));
+    const storageKey = isStatsMode ? 'wbin_stats_columns' : 'wbin_campaigns_columns';
+    chrome.storage.local.get([storageKey], (res) => {
+        const saved = res[storageKey];
+        const visibleMap = Array.isArray(saved) ? saved.reduce((m, c) => (m[c] = true, m), {}) : null;
+        headers.forEach((th, idx) => {
+            const label = th.textContent.trim() || `Колонка ${idx+1}`;
+            const id = `col-${idx}`;
+            const wrapper = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = visibleMap ? !!visibleMap[idx] : true;
+            cb.addEventListener('change', () => applyColumnsVisibility());
+            wrapper.appendChild(cb);
+            const span = document.createElement('span');
+            span.textContent = label;
+            wrapper.appendChild(span);
+            wrapper.dataset.colIndex = String(idx);
+            columnsList.appendChild(wrapper);
+        });
+        applyColumnsVisibility();
+    });
+}
+
+function applyColumnsVisibility() {
+    const currentTable = isStatsMode ? document.getElementById('stats-data-table') : document.getElementById('data-table');
+    if (!currentTable || !columnsList) return;
+    const rows = Array.from(currentTable.querySelectorAll('tr'));
+    const states = [];
+    const checkboxes = Array.from(columnsList.querySelectorAll('label'));
+    checkboxes.forEach((label, i) => {
+        const cb = label.querySelector('input[type="checkbox"]');
+        const visible = !!(cb && cb.checked);
+        states[i] = visible;
+        rows.forEach((tr) => {
+            const cell = tr.children[i];
+            if (cell) cell.style.display = visible ? '' : 'none';
+        });
+    });
+    const storageKey = isStatsMode ? 'wbin_stats_columns' : 'wbin_campaigns_columns';
+    // Сохраняем индексы видимых колонок
+    const visibleIdx = states.map((v, i) => v ? i : null).filter((x) => x !== null);
+    chrome.storage.local.set({ [storageKey]: visibleIdx });
+}
+
+// Получение индексов видимых столбцов
+function getVisibleColumns() {
+    if (!columnsList) return null;
+    const checkboxes = Array.from(columnsList.querySelectorAll('label'));
+    return checkboxes.map((label, i) => {
+        const cb = label.querySelector('input[type="checkbox"]');
+        return cb && cb.checked ? i : null;
+    }).filter((x) => x !== null);
+}
+
+// Фильтрация данных по видимым столбцам
+function filterDataByVisibleColumns(data, visibleColumns) {
+    if (!visibleColumns || visibleColumns.length === 0) return data;
+    return data.map(row => {
+        const filtered = {};
+        Object.keys(row).forEach((key, index) => {
+            if (visibleColumns.includes(index)) {
+                filtered[key] = row[key];
+            }
+        });
+        return filtered;
+    });
+}
+
 // Функция для копирования данных в буфер обмена в формате для вставки в Google Sheets
 function copyToClipboard() {
     try {
+        const visibleColumns = getVisibleColumns();
+        if (!visibleColumns || visibleColumns.length === 0) {
+            throw new Error('Нет видимых столбцов для копирования');
+        }
+
         // В режиме статистики копируем данные статистики
         if (isStatsMode) {
             if (statsData.length === 0) {
                 throw new Error('Нет данных для копирования');
             }
             
-            // Формируем строку заголовков для статистики
-            const headers = 'Название\tID Кампании\tАртикулы\tПоказы\tКлики\tCTR (%)\tCPC\tCR (%)\tКорзины\tЗаказы\tЗатраты';
+            // Фильтруем данные по видимым столбцам
+            const filteredData = filterDataByVisibleColumns(statsData, visibleColumns);
+            
+            // Формируем строку заголовков для статистики (только видимые)
+            const allHeaders = ['Название', 'ID Кампании', 'Артикулы', 'Показы', 'Клики', 'CTR (%)', 'CPC', 'CR (%)', 'Корзины', 'Заказы', 'Затраты'];
+            const headers = visibleColumns.map(i => allHeaders[i]).join('\t');
             
             // Формируем строки данных с заменой точек на запятые в числовых значениях
-            const rows = statsData.map(item => {
-                return `${item.campaignName}\t${item.id}\t${item.nms}\t${item.views}\t${item.clicks}\t${String(item.ctr).replace('.', ',')}%\t${String(item.cpc).replace('.', ',')}\t${String(item.cr).replace('.', ',')}%\t${item.atbs}\t${item.orders}\t${String(item.sum).replace('.', ',')}`;
+            const rows = filteredData.map(item => {
+                const values = [item.campaignName, item.id, item.nms, item.views, item.clicks, 
+                               String(item.ctr).replace('.', ','), String(item.cpc).replace('.', ','), 
+                               String(item.cr).replace('.', ','), item.atbs, item.orders, String(item.sum).replace('.', ',')];
+                return visibleColumns.map(i => values[i]).join('\t');
             });
             
             // Объединяем всё в одну строку с разделителями строк
@@ -369,12 +469,17 @@ function copyToClipboard() {
             throw new Error('Нет данных для копирования');
         }
         
-        // Формируем строку заголовков
-        const headers = 'ID\tНазвание кампании\tАртикул';
+        // Фильтруем данные по видимым столбцам
+        const filteredData = filterDataByVisibleColumns(tableData, visibleColumns);
+        
+        // Формируем строку заголовков (только видимые)
+        const allHeaders = ['ID', 'Название кампании', 'Артикул'];
+        const headers = visibleColumns.map(i => allHeaders[i]).join('\t');
         
         // Формируем строки данных
-        const rows = tableData.map(item => {
-            return `${item.id}\t${item.campaignName}\t${item.nm}`;
+        const rows = filteredData.map(item => {
+            const values = [item.id, item.campaignName, item.nm];
+            return visibleColumns.map(i => values[i]).join('\t');
         });
         
         // Объединяем всё в одну строку с разделителями строк
@@ -397,15 +502,24 @@ function copyToClipboard() {
 // Функция для экспорта данных в Excel
 function exportToExcel() {
     try {
+        const visibleColumns = getVisibleColumns();
+        if (!visibleColumns || visibleColumns.length === 0) {
+            throw new Error('Нет видимых столбцов для экспорта');
+        }
+
         // В режиме статистики экспортируем данные статистики
         if (isStatsMode) {
             if (statsData.length === 0) {
                 throw new Error('Нет данных для экспорта');
             }
             
+            // Фильтруем данные по видимым столбцам
+            const filteredData = filterDataByVisibleColumns(statsData, visibleColumns);
+            
             // Используем точку с запятой в качестве разделителя для лучшей совместимости с Excel
             // Создаем заголовки
-            const headers = ['Название', 'ID Кампании', 'Артикулы', 'Показы', 'Клики', 'CTR (%)', 'CPC', 'CR (%)', 'Корзины', 'Заказы', 'Затраты'];
+            const allHeaders = ['Название', 'ID Кампании', 'Артикулы', 'Показы', 'Клики', 'CTR (%)', 'CPC', 'CR (%)', 'Корзины', 'Заказы', 'Затраты'];
+            const headers = visibleColumns.map(i => allHeaders[i]);
             
             // Подготавливаем BOM (Byte Order Mark) для корректного отображения кириллицы в Excel
             const BOM = '\uFEFF';
@@ -414,26 +528,15 @@ function exportToExcel() {
             let csvContent = BOM + headers.join(';') + '\r\n';
             
             // Добавляем строки данных
-            statsData.forEach(item => {
+            filteredData.forEach(item => {
                 // Заменяем точки на запятые в числовых значениях для правильного отображения в русской локализации Excel
                 // И добавляем префикс к значениям CTR, CPC и CR, чтобы предотвратить их интерпретацию как даты
-                const values = [
-                    item.campaignName,
-                    item.id,
-                    item.nms,
-                    item.views,
-                    item.clicks,
-                    // Добавляем символ процента и заменяем точку на запятую для CTR
-                    String(item.ctr).replace('.', ',') + '%',
-                    // Заменяем точку на запятую для CPC
-                    String(item.cpc).replace('.', ','),
-                    // Добавляем символ процента и заменяем точку на запятую для CR
-                    String(item.cr).replace('.', ',') + '%',
-                    item.atbs,
-                    item.orders,
-                    // Заменяем точку на запятую для затрат
-                    String(item.sum).replace('.', ',')
+                const allValues = [
+                    item.campaignName, item.id, item.nms, item.views, item.clicks,
+                    String(item.ctr).replace('.', ',') + '%', String(item.cpc).replace('.', ','),
+                    String(item.cr).replace('.', ',') + '%', item.atbs, item.orders, String(item.sum).replace('.', ',')
                 ];
+                const values = visibleColumns.map(i => allValues[i]);
                 
                 // Экранируем кавычками поля, содержащие точку с запятой и заменяем возможные кавычки
                 const safeValues = values.map(value => {
@@ -479,9 +582,13 @@ function exportToExcel() {
             throw new Error('Нет данных для экспорта');
         }
         
+        // Фильтруем данные по видимым столбцам
+        const filteredData = filterDataByVisibleColumns(tableData, visibleColumns);
+        
         // Используем точку с запятой в качестве разделителя для лучшей совместимости с Excel
         // Создаем заголовки
-        const headers = ['ID', 'Название кампании', 'Артикул'];
+        const allHeaders = ['ID', 'Название кампании', 'Артикул'];
+        const headers = visibleColumns.map(i => allHeaders[i]);
         
         // Подготавливаем BOM (Byte Order Mark) для корректного отображения кириллицы в Excel
         const BOM = '\uFEFF';
@@ -490,19 +597,22 @@ function exportToExcel() {
         let csvContent = BOM + headers.join(';') + '\r\n';
         
         // Добавляем строки данных
-        tableData.forEach(item => {
+        filteredData.forEach(item => {
             // Экранируем кавычками все поля, содержащие точку с запятой
-            const id = String(item.id).includes(';') ? `"${item.id}"` : item.id;
-            const campaignName = String(item.campaignName).includes(';') ? `"${item.campaignName}"` : item.campaignName;
-            const nm = String(item.nm).includes(';') ? `"${item.nm}"` : item.nm;
+            const allValues = [item.id, item.campaignName, item.nm];
+            const values = visibleColumns.map(i => allValues[i]);
             
-            // Заменяем возможные кавычки внутри текста на двойные кавычки
-            const safeId = String(id).replace(/"/g, '""');
-            const safeCampaignName = String(campaignName).replace(/"/g, '""');
-            const safeNm = String(nm).replace(/"/g, '""');
+            // Экранируем кавычками поля, содержащие точку с запятой и заменяем возможные кавычки
+            const safeValues = values.map(value => {
+                const strValue = String(value);
+                if (strValue.includes(';')) {
+                    return `"${strValue.replace(/"/g, '""')}"`;
+                }
+                return strValue;
+            });
             
             // Формируем строку CSV
-            csvContent += `${safeId};${safeCampaignName};${safeNm}\r\n`;
+            csvContent += safeValues.join(';') + '\r\n';
         });
         
         // Создаем Blob с данными, указывая кодировку UTF-8

@@ -1,5 +1,32 @@
 // WBin ASK Page JavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    // Префилл из параметров URL (ids, from, to) — выполняем до initAskPage
+    try {
+        const url = new URL(window.location.href);
+        const idsParam = url.searchParams.get('ids');
+        const fromParam = url.searchParams.get('from');
+        const toParam = url.searchParams.get('to');
+
+        if (idsParam) {
+            const ids = idsParam.split(',').map(s => s.trim()).filter(Boolean);
+            if (ids.length > 0) {
+                const input = document.getElementById('askAdvertId');
+                if (input) input.value = ids.join(', ');
+                chrome.storage.local.set({ 'askLastAdvertId': ids.join(', ') });
+            }
+        }
+        if (fromParam) {
+            const fromEl = document.getElementById('askDateFrom');
+            if (fromEl) fromEl.value = fromParam;
+            chrome.storage.local.set({ 'askLastDateFrom': fromParam });
+        }
+        if (toParam) {
+            const toEl = document.getElementById('askDateTo');
+            if (toEl) toEl.value = toParam;
+            chrome.storage.local.set({ 'askLastDateTo': toParam });
+        }
+    } catch(_) {}
+
     // Инициализация страницы АСК
     initAskPage();
 });

@@ -580,6 +580,114 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Для асинхронного ответа
     return true;
   }
+
+  // Запуск Анализа АСК из списка статистики (получаем IDs и даты из stats)
+  if (message.action === 'askFromStats') {
+    (async () => {
+      try {
+        // Попробуем прочитать даты из URL активной вкладки статистики
+        let urlFromParam = '';
+        let urlToParam = '';
+        try {
+          const activeTab = await new Promise((resolve) => {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => resolve(tabs && tabs[0]));
+          });
+          if (activeTab && activeTab.url && activeTab.url.includes('/campaigns/statistics')) {
+            const statsUrl = new URL(activeTab.url);
+            const f = statsUrl.searchParams.get('from');
+            const t = statsUrl.searchParams.get('to');
+            // Ожидаем формат наподобие 2025-08-18T00:00:00Z -> берём YYYY-MM-DD
+            if (typeof f === 'string' && f.length >= 10) urlFromParam = f.slice(0, 10);
+            if (typeof t === 'string' && t.length >= 10) urlToParam = t.slice(0, 10);
+          }
+        } catch(_) {}
+        // Требуются актуальные данные statsRequest/url. Попробуем выполнить запрос, если есть сохранённый statsRequest
+        let statsData = null;
+        if (statsRequest && statsRequest.url) {
+          try {
+            const data = await makeRequest(statsRequest.url, statsRequest.headers);
+            if (data && data.content) {
+              statsData = data;
+            }
+          } catch (e) {
+            // noop, попробуем использовать результаты, если они уже были получены ранее
+          }
+        }
+
+        // Если данных нет, попробуем взять из последнего успешного результата статистики
+        if (!statsData && requestResults && requestResults.success && requestResults.isStatsMode && requestResults.data) {
+          statsData = requestResults.data;
+        }
+
+        if (!(statsData && Array.isArray(statsData.content))) {
+          sendResponse({ success: false, error: 'Статистика недоступна. Обновите страницу и попробуйте снова.' });
+          return;
+        }
+
+        // Собираем уникальные ID кампаний и диапазон дат из content[].begin/end
+        const idsSet = new Set();
+        let minBeginDate = null;
+        let maxEndDate = null;
+        let minBeginRaw = null;
+        let maxEndRaw = null;
+
+        const normalizeWbDate = (s) => {
+          try {
+            if (!s || typeof s !== 'string') return null;
+            let str = s.trim();
+            // 'YYYY-MM-DD HH:mm:ss.ssssss+03' -> 'YYYY-MM-DDTHH:mm:ss.sss+03:00'
+            str = str.replace(' ', 'T');
+            // урезаем микросекунды до 3 знаков
+            str = str.replace(/\.(\d{3})\d+(?=[+-]\d{2}(?::?\d{2})?$)/, '.$1');
+            // приводим смещение '+03' к '+03:00'
+            str = str.replace(/([+-]\d{2})(?=$)/, '$1:00');
+            const d = new Date(str);
+            return isNaN(d.getTime()) ? null : d;
+          } catch { return null; }
+        };
+
+        statsData.content.forEach((item) => {
+          if (item && (item.id != null)) idsSet.add(String(item.id));
+          if (item && item.begin) {
+            const d = normalizeWbDate(item.begin);
+            if (d && (!minBeginDate || d < minBeginDate)) { minBeginDate = d; minBeginRaw = item.begin; }
+          }
+          if (item && item.end) {
+            const d = normalizeWbDate(item.end);
+            if (d && (!maxEndDate || d > maxEndDate)) { maxEndDate = d; maxEndRaw = item.end; }
+          }
+        });
+
+        const ids = Array.from(idsSet);
+        if (ids.length === 0) {
+          sendResponse({ success: false, error: 'Не удалось извлечь ID кампаний со страницы.' });
+          return;
+        }
+
+        // Форматируем даты в YYYY-MM-DD — берём дату из исходной строки (надёжно к TZ)
+        const sliceDate = (s, fallbackDate) =>
+          (typeof s === 'string' && s.length >= 10) ? s.slice(0, 10) : (fallbackDate ? `${fallbackDate.getFullYear()}-${String(fallbackDate.getMonth()+1).padStart(2,'0')}-${String(fallbackDate.getDate()).padStart(2,'0')}` : '');
+        let fromStr = sliceDate(minBeginRaw, minBeginDate);
+        let toStr = sliceDate(maxEndRaw, maxEndDate);
+        // Приоритет: если есть параметры from/to в URL страницы статистики — используем их
+        if (urlFromParam) fromStr = urlFromParam;
+        if (urlToParam) toStr = urlToParam;
+
+        // Открываем вкладку анализа АСК с параметрами
+        const url = new URL(chrome.runtime.getURL('ask.html'));
+        url.searchParams.set('ids', ids.join(','));
+        if (fromStr) url.searchParams.set('from', fromStr);
+        if (toStr) url.searchParams.set('to', toStr);
+
+        chrome.tabs.create({ url: url.toString() });
+        sendResponse({ success: true, idsCount: ids.length, from: fromStr, to: toStr });
+      } catch (e) {
+        console.error('askFromStats error:', e);
+        sendResponse({ success: false, error: e && e.message ? e.message : 'Неизвестная ошибка' });
+      }
+    })();
+    return true;
+  }
 });
 
 // Функция для форматирования даты в формат API АСК (с временем и часовым поясом)

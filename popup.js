@@ -26,6 +26,33 @@ document.addEventListener('DOMContentLoaded', function() {
             window.close();
         });
     }
+
+    // Кнопка: заполнить Анализ АСК из страницы статистики
+    const askFromStatsBtn = document.getElementById('ask-from-stats-btn');
+    if (askFromStatsBtn) {
+        askFromStatsBtn.addEventListener('click', function() {
+            // Проверяем, что активная вкладка — это статистика WB (не детальная)
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                const currentTab = tabs[0];
+                if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru/campaigns/statistics') && !currentTab.url.includes('/campaigns/statistics/details/')) {
+                    askFromStatsBtn.disabled = true;
+                    const originalText = askFromStatsBtn.textContent;
+                    askFromStatsBtn.textContent = 'Загрузка…';
+                    chrome.runtime.sendMessage({ action: 'askFromStats' }, function(resp) {
+                        askFromStatsBtn.disabled = false;
+                        askFromStatsBtn.textContent = originalText;
+                        if (!(resp && resp.success)) {
+                            alert('Не удалось получить данные со страницы статистики. Обновите страницу и попробуйте снова.');
+                        } else {
+                            window.close();
+                        }
+                    });
+                } else {
+                    alert('Откройте список статистики кампаний WB (не детали) и попробуйте снова.');
+                }
+            });
+        });
+    }
     
     // Обработка нажатия на кнопку отчёта для кампаний
     const campaignsReportBtn = document.getElementById('campaigns-report-btn');
