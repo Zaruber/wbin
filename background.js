@@ -588,19 +588,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Попробуем прочитать даты из URL активной вкладки статистики
         let urlFromParam = '';
         let urlToParam = '';
+        const pickYmd = (s) => (typeof s === 'string' && s.length >= 10) ? s.slice(0, 10) : '';
         try {
           const activeTab = await new Promise((resolve) => {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => resolve(tabs && tabs[0]));
           });
           if (activeTab && activeTab.url && activeTab.url.includes('/campaigns/statistics')) {
             const statsUrl = new URL(activeTab.url);
-            const f = statsUrl.searchParams.get('from');
-            const t = statsUrl.searchParams.get('to');
-            // Ожидаем формат наподобие 2025-08-18T00:00:00Z -> берём YYYY-MM-DD
-            if (typeof f === 'string' && f.length >= 10) urlFromParam = f.slice(0, 10);
-            if (typeof t === 'string' && t.length >= 10) urlToParam = t.slice(0, 10);
+            const f = statsUrl.searchParams.get('from') || statsUrl.searchParams.get('dateFrom');
+            const t = statsUrl.searchParams.get('to') || statsUrl.searchParams.get('dateTo');
+            // Берём YYYY-MM-DD безопасно без Date-конверсий
+            urlFromParam = pickYmd(f);
+            urlToParam = pickYmd(t);
           }
         } catch(_) {}
+        // Фолбэк: если даты не найдены в URL вкладки, пробуем взять из последнего URL запроса статистики
+        if ((!urlFromParam || !urlToParam) && statsRequest && typeof statsRequest.url === 'string') {
+          try {
+            const u = new URL(statsRequest.url);
+            const f2 = u.searchParams.get('from') || u.searchParams.get('dateFrom');
+            const t2 = u.searchParams.get('to') || u.searchParams.get('dateTo');
+            if (!urlFromParam) urlFromParam = pickYmd(f2);
+            if (!urlToParam) urlToParam = pickYmd(t2);
+          } catch(_) {}
+        }
         // Требуются актуальные данные statsRequest/url. Попробуем выполнить запрос, если есть сохранённый statsRequest
         let statsData = null;
         if (statsRequest && statsRequest.url) {
