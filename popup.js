@@ -83,33 +83,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleFinancialReport() {
         setFeatureLoading(financialFeature, 'Открытие...');
-        try {
-            chrome.storage.local.get(['authorizev3'], (res) => {
-                const hasToken = res && typeof res.authorizev3 === 'string' && res.authorizev3.trim();
-                if (hasToken) {
-                    const url = chrome.runtime.getURL('finreport/reports.html');
-                    chrome.tabs.create({ url });
-                    setTimeout(() => { window.close(); }, 500);
-                    return;
-                }
-
-                // Токена нет — открываем seller.wildberries.ru фоном для перехвата AuthorizeV3
-                chrome.tabs.create({ url: 'https://seller.wildberries.ru/', active: false }, (tab) => {
-                    // Дадим время контент-скрипту внедрить page-hook и перехватить токен
-                    setTimeout(() => {
-                        const repUrl = chrome.runtime.getURL('finreport/reports.html');
-                        chrome.tabs.create({ url: repUrl });
-                        // Пытаемся закрыть фоновую вкладку через пару секунд
-                        setTimeout(() => { try { chrome.tabs.remove(tab.id); } catch(_){} }, 2000);
-                        setTimeout(() => { window.close(); }, 500);
-                    }, 2000);
-                });
-            });
-        } catch (_) {
-            const url = chrome.runtime.getURL('finreport/reports.html');
-            chrome.tabs.create({ url });
-            setTimeout(() => { window.close(); }, 500);
-        }
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tab = tabs && tabs[0];
+            const url = (tab && tab.url) || '';
+            const isReportsPage = typeof url === 'string' && url.includes('seller.wildberries.ru/suppliers-mutual-settlements/reports-implementations/reports-weekly');
+            if (isReportsPage) {
+                const repUrl = chrome.runtime.getURL('finreport/reports.html');
+                chrome.tabs.create({ url: repUrl });
+                setTimeout(() => { window.close(); }, 300);
+            } else {
+                setFeatureError(financialFeature, 'Откройте страницу отчетов');
+                showNotification('Откройте страницу: Финансовые отчёты → Отчёты реализации', 'error');
+            }
+        });
     }
     
     // Добавляем обработчики для feature items

@@ -66,8 +66,7 @@
         "finreport/styles/reports.css",
         "finreport/pngwing.com.png",
         "finreport/Telegram_logo.svg",
-        "finreport/content/page-hook.js",
-        "image/wbin_logo.svg"
+        "finreport/content/page-hook.js"
       ],
       "matches": ["<all_urls>"]
     }
