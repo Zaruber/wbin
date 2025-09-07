@@ -674,7 +674,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (urlToParam) toStr = urlToParam;
 
         // Открываем вкладку анализа АСК с параметрами
-        const url = new URL(chrome.runtime.getURL('ask.html'));
+        const url = new URL(chrome.runtime.getURL('ask/ask.html'));
         url.searchParams.set('ids', ids.join(','));
         if (fromStr) url.searchParams.set('from', fromStr);
         if (toStr) url.searchParams.set('to', toStr);

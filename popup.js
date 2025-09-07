@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleAskReport() {
         setFeatureLoading(askFeature, 'Открытие...');
-        chrome.tabs.create({ url: chrome.runtime.getURL('ask.html') });
+        chrome.tabs.create({ url: chrome.runtime.getURL('ask/ask.html') });
         setTimeout(() => {
             window.close();
         }, 500);
