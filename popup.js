@@ -1,88 +1,233 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Переключение между вкладками
-    const navItems = document.querySelectorAll('.nav-item');
-    const contentSections = document.querySelectorAll('.content');
+    // Принудительно устанавливаем размеры попапа
+    function setPopupDimensions() {
+        document.documentElement.style.width = '400px';
+        document.documentElement.style.minWidth = '400px';
+        document.documentElement.style.maxWidth = '400px';
+        document.documentElement.style.minHeight = '500px';
+        document.documentElement.style.maxHeight = '600px';
+        
+        document.body.style.width = '400px';
+        document.body.style.minWidth = '400px';
+        document.body.style.maxWidth = '400px';
+        document.body.style.minHeight = '500px';
+        document.body.style.maxHeight = '600px';
+        document.body.style.overflow = 'visible';
+    }
     
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Удаляем класс active у всех элементов навигации и скрываем все секции
-            navItems.forEach(nav => nav.classList.remove('active'));
-            contentSections.forEach(content => content.style.display = 'none');
+    // Устанавливаем размеры сразу
+    setPopupDimensions();
+    
+    // Повторяем через небольшую задержку для надежности
+    setTimeout(setPopupDimensions, 100);
+    // Управление feature items
+    const featureItems = document.querySelectorAll('.feature-item');
+    
+    // Добавляем data-feature атрибуты к feature items
+    const campaignsFeature = document.querySelector('.feature-item:nth-child(1)');
+    const statisticsFeature = document.querySelector('.feature-item:nth-child(2)');
+    const askFeature = document.querySelector('.feature-item:nth-child(3)');
+    const financialFeature = document.querySelector('.feature-item:nth-child(4)');
+    
+    if (campaignsFeature) campaignsFeature.setAttribute('data-feature', 'campaigns');
+    if (statisticsFeature) statisticsFeature.setAttribute('data-feature', 'statistics');
+    if (askFeature) askFeature.setAttribute('data-feature', 'ask');
+    if (financialFeature) financialFeature.setAttribute('data-feature', 'financial');
+    
+    // Функции для каждого типа отчета
+    function handleCampaignsReport() {
+        setFeatureLoading(campaignsFeature, 'Загрузка...');
+        
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            const currentTab = tabs[0];
+            if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru/campaigns/list')) {
+                chrome.runtime.sendMessage({ action: 'generateReport', type: 'campaigns' }, function(response) {
+                    setFeatureSuccess(campaignsFeature, 'Готово!');
+                    setTimeout(() => {
+                        window.close();
+                    }, 1000);
+                });
+            } else {
+                setFeatureError(campaignsFeature, 'Ошибка');
+                showNotification('Перейдите на страницу кампаний Wildberries', 'error');
+            }
+        });
+    }
+    
+    function handleStatisticsReport() {
+        setFeatureLoading(statisticsFeature, 'Загрузка...');
+        
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            const currentTab = tabs[0];
+            if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru/campaigns/statistics')) {
+                chrome.runtime.sendMessage({ action: 'generateReport', type: 'statistics' }, function(response) {
+                    setFeatureSuccess(statisticsFeature, 'Готово!');
+                    setTimeout(() => {
+                        window.close();
+                    }, 1000);
+                });
+            } else {
+                setFeatureError(statisticsFeature, 'Ошибка');
+                showNotification('Перейдите на страницу статистики Wildberries', 'error');
+            }
+        });
+    }
+    
+    function handleAskReport() {
+        setFeatureLoading(askFeature, 'Открытие...');
+        chrome.tabs.create({ url: chrome.runtime.getURL('ask.html') });
+        setTimeout(() => {
+            window.close();
+        }, 500);
+    }
+    
+    function handleFinancialReport() {
+        setFeatureLoading(financialFeature, 'Загрузка...');
+        
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            const currentTab = tabs[0];
+            if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru')) {
+                chrome.runtime.sendMessage({ action: 'generateReport', type: 'financial' }, function(response) {
+                    setFeatureSuccess(financialFeature, 'Готово!');
+                    setTimeout(() => {
+                        window.close();
+                    }, 1000);
+                });
+            } else {
+                setFeatureError(financialFeature, 'Ошибка');
+                showNotification('Перейдите на страницу Wildberries', 'error');
+            }
+        });
+    }
+    
+    // Добавляем обработчики для feature items
+    featureItems.forEach(feature => {
+        feature.addEventListener('click', function() {
+            const featureType = this.getAttribute('data-feature');
             
-            // Добавляем класс active к выбранному элементу
-            this.classList.add('active');
-            
-            // Показываем соответствующий контент
-            const tabId = this.getAttribute('data-tab');
-            document.getElementById(`${tabId}-content`).style.display = 'block';
+            // Выполняем соответствующую функцию
+            switch(featureType) {
+                case 'campaigns':
+                    handleCampaignsReport();
+                    break;
+                case 'statistics':
+                    handleStatisticsReport();
+                    break;
+                case 'ask':
+                    handleAskReport();
+                    break;
+                case 'financial':
+                    handleFinancialReport();
+                    break;
+            }
         });
     });
-    
-    // Обработка нажатия на кнопку отчёта для АСК
-    const askReportBtn = document.getElementById('ask-report-btn');
-    if (askReportBtn) {
-        askReportBtn.addEventListener('click', function() {
-            chrome.tabs.create({ url: chrome.runtime.getURL('ask.html') });
-            window.close();
-        });
-    }
-
-    // Кнопка: заполнить Анализ АСК из страницы статистики
-    const askFromStatsBtn = document.getElementById('ask-from-stats-btn');
-    if (askFromStatsBtn) {
-        askFromStatsBtn.addEventListener('click', function() {
-            // Проверяем, что активная вкладка — это статистика WB (не детальная)
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                const currentTab = tabs[0];
-                if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru/campaigns/statistics') && !currentTab.url.includes('/campaigns/statistics/details/')) {
-                    askFromStatsBtn.disabled = true;
-                    const originalText = askFromStatsBtn.textContent;
-                    askFromStatsBtn.textContent = 'Загрузка…';
-                    chrome.runtime.sendMessage({ action: 'askFromStats' }, function(resp) {
-                        askFromStatsBtn.disabled = false;
-                        askFromStatsBtn.textContent = originalText;
-                        if (!(resp && resp.success)) {
-                            alert('Не удалось получить данные со страницы статистики. Обновите страницу и попробуйте снова.');
-                        } else {
-                            window.close();
-                        }
-                    });
-                } else {
-                    alert('Откройте список статистики кампаний WB (не детали) и попробуйте снова.');
-                }
-            });
-        });
-    }
-    
-    // Обработка нажатия на кнопку отчёта для кампаний
-    const campaignsReportBtn = document.getElementById('campaigns-report-btn');
-    if (campaignsReportBtn) {
-        campaignsReportBtn.addEventListener('click', function() {
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                const currentTab = tabs[0];
-                if (currentTab.url.includes('cmp.wildberries.ru/campaigns/list')) {
-                    chrome.runtime.sendMessage({ action: 'generateReport', type: 'campaigns' });
-                    window.close();
-                } else {
-                    alert('Пожалуйста, перейдите на страницу кампаний Wildberries согласно инструкции.');
-                }
-            });
-        });
-    }
-    
-    // Обработка нажатия на кнопку отчёта для статистики
-    const statisticsReportBtn = document.getElementById('statistics-report-btn');
-    if (statisticsReportBtn) {
-        statisticsReportBtn.addEventListener('click', function() {
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                const currentTab = tabs[0];
-                if (currentTab.url.includes('cmp.wildberries.ru/campaigns/statistics')) {
-                    chrome.runtime.sendMessage({ action: 'generateReport', type: 'statistics' });
-                    window.close();
-                } else {
-                    alert('Пожалуйста, перейдите на страницу статистики Wildberries согласно инструкции.');
-                }
-            });
-        });
-    }
 });
+
+// Вспомогательные функции для управления состоянием feature items
+function setFeatureLoading(feature, text) {
+    const featureName = feature.querySelector('.feature-name');
+    if (featureName) {
+        featureName.textContent = text;
+    }
+    feature.classList.add('loading');
+}
+
+function setFeatureSuccess(feature, text) {
+    const featureName = feature.querySelector('.feature-name');
+    if (featureName) {
+        featureName.textContent = text;
+    }
+    feature.classList.remove('loading');
+    feature.classList.add('success');
+}
+
+function setFeatureError(feature, text) {
+    const featureName = feature.querySelector('.feature-name');
+    if (featureName) {
+        featureName.textContent = text;
+    }
+    feature.classList.remove('loading');
+    feature.classList.add('error');
+    
+    // Сбрасываем состояние через 3 секунды
+    setTimeout(() => {
+        feature.classList.remove('error');
+        const featureName = feature.querySelector('.feature-name');
+        if (featureName) {
+            featureName.textContent = getOriginalFeatureName(feature);
+        }
+    }, 3000);
+}
+
+function getOriginalFeatureName(feature) {
+    const featureType = feature.getAttribute('data-feature');
+    switch(featureType) {
+        case 'campaigns': return 'Кампании';
+        case 'statistics': return 'Статистика';
+        case 'ask': return 'АСК Анализ';
+        case 'financial': return 'Фин.Отчеты';
+        default: return 'Раздел';
+    }
+}
+
+// Функция для показа уведомлений (можно расширить)
+function showNotification(message, type = 'info') {
+    // Простая реализация - можно заменить на более продвинутую
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    
+    // Создаем временное уведомление
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 'rgba(34, 197, 94, 0.9)'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Добавляем CSS анимации для уведомлений
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+    }
+`;
+document.head.appendChild(style);

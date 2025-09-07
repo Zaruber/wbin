@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=400, initial-scale=1.0, user-scalable=no">
     <title>WBin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,162 +10,89 @@
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
+        <!-- Header -->
         <div class="header">
-            <div class="app-info">
-                <div class="app-icon">
-                    <img src="48.png" alt="WBin">
-                </div>
-                <div class="app-details">
-                    <h1 class="app-name">WBin</h1>
-                    <span class="app-version">v1.5</span>
+            <div class="header-left">
+                <div class="app-logo-compact">
+                    <img src="image/wbin_logo.svg" alt="WBin" class="logo-img">
+                    <div class="version-badge">v1.5</div>
                 </div>
             </div>
-            <a href="https://t.me/+3g9fjC4OTn03MWYx" target="_blank" class="telegram-link" style="display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: 10px;">
-                <img src="Telegram_logo.svg" alt="Telegram" width="20" height="20" style="display:block;">
-                <div style="display: flex; flex-direction: column; line-height: 1.1;">
-                    <span style="font-weight: 600; color: #0a84ff;">Вступить в чат ↗</span>
-                    <span style="color: #6b7280; font-size: 11px;">обновления и вопросы по WBin</span>
-                </div>
-            </a>
-            <a href="https://github.com/Zaruber/wbin" target="_blank" class="github-link">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-            </a>
-        </div>
-
-        <div class="navigation">
-            <button class="nav-item active" data-tab="campaigns">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                </svg>
-            </button>
-            <button class="nav-item" data-tab="statistics">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
-                </svg>
-            </button>
-            <button class="nav-item" data-tab="ask">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="content" id="campaigns-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Парсинг кампаний</h2>
-                    <p>Извлечение данных о рекламных кампаниях и артикулах</p>
-                </div>
-                <div class="card-body">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <p>Перейдите в <a href="https://cmp.wildberries.ru/campaigns/list/" target="_blank">свои кампании</a></p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <p>Установите <code>pageSize=99</code> в URL для максимального количества записей</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <p>Нажмите кнопку "Получить отчёт" после загрузки страницы</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="actions">
-                    <button id="campaigns-report-btn" class="btn btn-primary">Получить отчёт</button>
+            <div class="header-right">
+                <div class="header-links">
+                    <a href="https://t.me/+3g9fjC4OTn03MWYx" target="_blank" class="header-link telegram-link" title="Вступить в чат">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16l-1.61 7.59c-.12.54-.44.68-.89.42l-2.46-1.81-1.19 1.15c-.13.13-.24.24-.49.24l.18-2.55 4.57-4.13c.2-.18-.04-.28-.31-.1l-5.64 3.55-2.43-.76c-.53-.16-.54-.53.11-.79l9.57-3.69c.44-.16.83.1.69.79z"/>
+                        </svg>
+                    </a>
+                    <a href="https://github.com/Zaruber/wbin" target="_blank" class="header-link github-link" title="GitHub">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="content" id="statistics-content" style="display: none;">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Парсинг статистики</h2>
-                    <p>Анализ эффективности рекламных кампаний</p>
-                </div>
-                <div class="card-body">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <p>Перейдите в <a href="https://cmp.wildberries.ru/campaigns/statistics/" target="_blank">статистику кампаний</a></p>
-                        </div>
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Features Section -->
+            <div class="features-section">
+                <div class="feature-item active">
+                    <div class="feature-icon campaigns-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
                     </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <p>Установите <code>pageSize=50</code> в URL для полного списка</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <p>Нажмите кнопку "Получить отчёт" для анализа данных</p>
-                        </div>
+                    <div class="feature-info">
+                        <div class="feature-name">Список кампаний</div>
+                        <div class="feature-date">Парсинг данных</div>
                     </div>
                 </div>
-                <div class="actions">
-                    <button id="statistics-report-btn" class="btn btn-primary">Получить отчёт</button>
+
+                <div class="feature-item">
+                    <div class="feature-icon statistics-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                        </svg>
+                    </div>
+                    <div class="feature-info">
+                        <div class="feature-name">Статистика кампаний</div>
+                        <div class="feature-date">Парсинг данных</div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon ask-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <div class="feature-info">
+                        <div class="feature-name">АСК Анализ</div>
+                        <div class="feature-date">Авто сбор</div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon financial-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                    </div>
+                    <div class="feature-info">
+                        <div class="feature-name">Фин.Отчеты</div>
+                        <div class="feature-date">в разработке..</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="content" id="ask-content" style="display: none;">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Анализ АСК</h2>
-                    <p>Детальный анализ ассоциированных конверсий</p>
-                </div>
-                <div class="card-body">
-                    <div class="info-banner">
-                        Необходима авторизация в <a href="https://cmp.wildberries.ru/" target="_blank">ЛК Wildberries</a>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <p>Убедитесь, что вы авторизованы в <a href="https://cmp.wildberries.ru/" target="_blank">ЛК Wildberries</a></p>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <p>Нажмите кнопку "Получить отчёт" для открытия расширенного интерфейса анализа АСК</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <p>В открывшейся вкладке введите ID рекламы и выберите период для анализа</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="actions">
-                    <button id="ask-report-btn" class="btn btn-primary">Получить отчёт</button>
-                    <button id="ask-from-stats-btn" class="btn btn-secondary" title="Открыть Анализ АСК с ID и датами из списка статистики">
-                        Заполнить из статистики
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <div class="footer-info">
-                <span>Создано</span>
-                <a href="https://t.me/real_zaruber" target="_blank" class="author-link">@zaruber</a>
-            </div>
-        </div>
     </div>
 
     <script src="popup.js"></script>
 </body>
 </html> 
+

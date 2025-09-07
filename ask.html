@@ -14,13 +14,10 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="app-info">
+                <div class="header-left"></div>
+                <div class="header-center">
                     <div class="app-icon">
-                        <img src="48.png" alt="WBin">
-                    </div>
-                    <div class="app-details">
-                        <h1 class="app-name">WBin</h1>
-                        <span class="app-version">Анализ АСК v1.5</span>
+                        <img src="image/wbin_logo.svg" alt="WBin">
                     </div>
                 </div>
                 <div class="header-actions">
@@ -109,7 +106,15 @@
                 <div class="card main-summary-card" id="askMainSummaryCard">
                     <div class="card-header">
                         <h3 id="askResultsHeader">Результаты анализа</h3>
-                        <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
+                        <div class="header-actions">
+                            <button id="askCopyData" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                </svg>
+                                Копировать данные
+                            </button>
+                            <div id="askCopySuccess" class="success-message">Скопировано в буфер обмена!</div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="table-container">
@@ -149,15 +154,6 @@
                                 </thead>
                                 <tbody id="askAssocBody"></tbody>
                             </table>
-                        </div>
-                        
-                        <div class="actions">
-                            <button id="askCopyData" class="btn btn-secondary">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                                </svg>
-                                Копировать данные
-                            </button>
                         </div>
                     </div>
                 </div>

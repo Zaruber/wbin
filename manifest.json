@@ -4,10 +4,10 @@
   "version": "1.5",
   "description": "Скачивание данных, статистики, фин. отчетов с сайта Wildberries простым способом",
   "icons": {
-    "16": "16.png",
-    "32": "32.png",
-    "48": "48.png",
-    "128": "128.png"
+    "16": "image/16.png",
+    "32": "image/32.png",
+    "48": "image/48.png",
+    "128": "image/128.png"
   },
   "permissions": [
     "webRequest",
@@ -32,18 +32,18 @@
     }
   ],
   "action": {
-    "default_title": "WBin - Получить данные API",
+    "default_title": "WBin - Получить данные c WB",
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "16.png",
-      "32": "32.png",
-      "48": "48.png",
-      "128": "128.png"
+      "16": "image/16.png",
+      "32": "image/32.png",
+      "48": "image/48.png",
+      "128": "image/128.png"
     }
   },
   "web_accessible_resources": [
     {
-      "resources": ["results.html", "results.js", "popup.css", "popup.js", "ask.html", "ask.css", "ask.js", "github-logo.svg", "inject.js"],
+      "resources": ["results.html", "results.js", "popup.css", "popup.js", "ask.html", "ask.css", "ask.js", "image/github-logo.svg", "inject.js"],
       "matches": ["<all_urls>"]
     }
   ]

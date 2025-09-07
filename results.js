@@ -120,11 +120,11 @@ function showResults(data) {
     // Отображаем результаты
     try {
         resultElement.textContent = JSON.stringify(data, null, 2);
-        resultElement.style.display = 'block';
+        // Не показываем JSON автоматически - он должен быть скрыт по умолчанию
     } catch (error) {
         console.error('Ошибка при отображении JSON:', error);
         resultElement.textContent = 'Ошибка при отображении JSON: ' + error.message;
-        resultElement.style.display = 'block';
+        // Не показываем JSON автоматически - он должен быть скрыт по умолчанию
     }
 }
 
@@ -399,6 +399,13 @@ function applyColumnsVisibility() {
 function getVisibleColumns() {
     if (!columnsList) return null;
     const checkboxes = Array.from(columnsList.querySelectorAll('label'));
+    // Если панель столбцов ещё не была построена, считаем видимыми все столбцы текущей таблицы
+    if (checkboxes.length === 0) {
+        const currentTable = isStatsMode ? document.getElementById('stats-data-table') : document.getElementById('data-table');
+        if (!currentTable) return null;
+        const headersCount = currentTable.querySelectorAll('thead th').length;
+        return Array.from({ length: headersCount }, (_, i) => i);
+    }
     return checkboxes.map((label, i) => {
         const cb = label.querySelector('input[type="checkbox"]');
         return cb && cb.checked ? i : null;
@@ -663,4 +670,45 @@ function showErrorMessage(message) {
     setTimeout(() => {
         errorElement.style.display = 'none';
     }, 5000);
-} 
+}
+
+// Функциональность для переключения видимости JSON
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleJsonBtn = document.getElementById('toggle-json-btn');
+    const resultElement = document.getElementById('result');
+    const body = document.body;
+    let isJsonVisible = false;
+    
+    // Инициализируем состояние - JSON скрыт, таблица на всю ширину
+    body.classList.add('json-hidden');
+    
+    if (toggleJsonBtn && resultElement) {
+        toggleJsonBtn.addEventListener('click', () => {
+            isJsonVisible = !isJsonVisible;
+            
+            if (isJsonVisible) {
+                // Показываем JSON, возвращаем таблицу к исходному размеру
+                resultElement.style.display = 'block';
+                body.classList.remove('json-hidden');
+                toggleJsonBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                        <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                    </svg>
+                    JSON
+                `;
+            } else {
+                // Скрываем JSON, таблица занимает всю ширину
+                resultElement.style.display = 'none';
+                body.classList.add('json-hidden');
+                toggleJsonBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                        <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                    </svg>
+                    JSON
+                `;
+            }
+        });
+    }
+}); 
