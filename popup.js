@@ -82,22 +82,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function handleFinancialReport() {
-        setFeatureLoading(financialFeature, 'Загрузка...');
-        
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            const currentTab = tabs[0];
-            if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru')) {
-                chrome.runtime.sendMessage({ action: 'generateReport', type: 'financial' }, function(response) {
-                    setFeatureSuccess(financialFeature, 'Готово!');
+        setFeatureLoading(financialFeature, 'Открытие...');
+        try {
+            chrome.storage.local.get(['authorizev3'], (res) => {
+                const hasToken = res && typeof res.authorizev3 === 'string' && res.authorizev3.trim();
+                if (hasToken) {
+                    const url = chrome.runtime.getURL('finreport/reports.html');
+                    chrome.tabs.create({ url });
+                    setTimeout(() => { window.close(); }, 500);
+                    return;
+                }
+
+                // Токена нет — открываем seller.wildberries.ru фоном для перехвата AuthorizeV3
+                chrome.tabs.create({ url: 'https://seller.wildberries.ru/', active: false }, (tab) => {
+                    // Дадим время контент-скрипту внедрить page-hook и перехватить токен
                     setTimeout(() => {
-                        window.close();
-                    }, 1000);
+                        const repUrl = chrome.runtime.getURL('finreport/reports.html');
+                        chrome.tabs.create({ url: repUrl });
+                        // Пытаемся закрыть фоновую вкладку через пару секунд
+                        setTimeout(() => { try { chrome.tabs.remove(tab.id); } catch(_){} }, 2000);
+                        setTimeout(() => { window.close(); }, 500);
+                    }, 2000);
                 });
-            } else {
-                setFeatureError(financialFeature, 'Ошибка');
-                showNotification('Перейдите на страницу Wildberries', 'error');
-            }
-        });
+            });
+        } catch (_) {
+            const url = chrome.runtime.getURL('finreport/reports.html');
+            chrome.tabs.create({ url });
+            setTimeout(() => { window.close(); }, 500);
+        }
     }
     
     // Добавляем обработчики для feature items

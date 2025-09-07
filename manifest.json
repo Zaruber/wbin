@@ -19,7 +19,9 @@
   ],
   "host_permissions": [
     "https://cmp.wildberries.ru/*",
-    "https://*.wildberries.ru/*"
+    "https://*.wildberries.ru/*",
+    "https://seller.wildberries.ru/*",
+    "https://seller-services.wildberries.ru/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -28,6 +30,11 @@
     {
       "matches": ["https://cmp.wildberries.ru/*"],
       "js": ["content.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://seller.wildberries.ru/*"],
+      "js": ["finreport/content/injector.js"],
       "run_at": "document_start"
     }
   ],
@@ -43,7 +50,25 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["results.html", "results.js", "popup.css", "popup.js", "ask.html", "ask.css", "ask.js", "image/github-logo.svg", "inject.js"],
+      "resources": [
+        "results.html",
+        "results.js",
+        "popup.css",
+        "popup.js",
+        "ask.html",
+        "ask.css",
+        "ask.js",
+        "image/github-logo.svg",
+        "inject.js",
+        "finreport/reports.html",
+        "finreport/scripts/preload.js",
+        "finreport/scripts/reports.js",
+        "finreport/styles/reports.css",
+        "finreport/pngwing.com.png",
+        "finreport/Telegram_logo.svg",
+        "finreport/content/page-hook.js",
+        "image/wbin_logo.svg"
+      ],
       "matches": ["<all_urls>"]
     }
   ]
