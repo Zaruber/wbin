@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finreport — недельные отчеты</title>
+    <link rel="stylesheet" href="styles/reports.css" />
+    <script defer src="scripts/preload.js"></script>
+    <script defer src="scripts/reports.js"></script>
+  </head>
+  <body>
+    <header class="header">
+      <div class="promo-grid">
+        <div class="promo-card">
+          <a href="https://zaruber.github.io/zaruberpage/" target="_blank" rel="noopener noreferrer" class="promo-link-block">
+            <img src="pngwing.com.png" alt="Cat" class="promo-avatar">
+            <span class="promo-content">
+              <span class="promo-title">
+                <span>Вот сюда кликнешь</span>
+                <span class="promo-arrow">↗</span>
+              </span>
+              <span class="promo-desc">откроется сайт с полезными инструментами для маркетплейсов</span>
+            </span>
+          </a>
+        </div>
+        <div class="promo-card">
+          <a href="https://t.me/+3g9fjC4OTn03MWYx" target="_blank" rel="noopener noreferrer" class="promo-link-block">
+            <img src="Telegram_logo.svg" alt="Telegram" class="promo-avatar">
+            <span class="promo-content">
+              <span class="promo-title">
+                <span>Вступить в чат</span>
+                <span class="promo-arrow">↗</span>
+              </span>
+              <span class="promo-desc">обновления и вопросы по Finreport</span>
+            </span>
+          </a>
+        </div>
+        <div></div>
+      </div>
+      <div class="hdr-title-wrapper">
+        <div class="hdr-title">Finreport</div>
+        <div class="hdr-subtitle">Удобные финансовые отчеты</div>
+      </div>
+      <div class="hdr-actions">
+      </div>
+    </header>
+    <main class="main">
+      
+      <section class="bulk-actions">
+        <div class="sel-info">Выбрано: <span id="selCount">0</span></div>
+        <div class="sel-actions">
+          <button id="reload" class="btn">Обновить</button>
+          <button id="selectAllOnPage" class="btn">Выбрать все на странице</button>
+          <button id="clearSelection" class="btn">Снять выбор</button>
+          <button id="downloadSelectedZip" class="btn primary">Скачать выбранные ZIP</button>
+        </div>
+      </section>
+      <section>
+        <div class="table-container">
+          <table class="table" id="reportsTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAllToggle" /></th>
+                <th>№</th>
+                <th>Юридическое лицо</th>
+                <th>Период</th>
+                <th>Дата формирования</th>
+                <th>Продажа</th>
+                <th>Скидка %</th>
+                <th>К перечислению</th>
+                <th>Логистика</th>
+                <th>Штраф лог.</th>
+                <th>Штраф обмер</th>
+                <th>Прочие штрафы</th>
+                <th>Всего штрафов</th>
+                <th>Корректировка</th>
+                <th>WB комиссия</th>
+                <th>Хранение</th>
+                <th>Приемка</th>
+                <th>Удержания</th>
+                <th>К оплате</th>
+                <th>Валюта</th>
+                <th>Тип</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="sentinel" style="height: 24px;"></div>
+      </section>
+    </main>
+  </body>
+  </html>
+
+
