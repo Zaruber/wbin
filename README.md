@@ -1,4 +1,4 @@
-<img src="screen.png" alt="Скриншот расширения" width="800">
+<img src="image/pic1_gh.png" alt="Скриншот расширения" width="800">
 
 # WBin - Расширение для Wildberries
 
