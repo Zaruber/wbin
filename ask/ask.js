@@ -792,11 +792,13 @@ function askCopyResultsToClipboard() {
         const cells = row.children;
         if (cells.length >= 14) {
             const rowData = [];
-            for (let i = 0; i < 14; i++) {
-                const cellText = cells[i].textContent.trim();
-                const cleanValue = cellText.replace(/\s/g, '').replace(/,/g, '.');
-                rowData.push(cleanValue);
-            }
+			for (let i = 0; i < 14; i++) {
+				const cellText = cells[i].textContent.trim();
+				const noSpaces = cellText.replace(/\s/g, '');
+				const isSpendColumn = i === 3; // "Затраты"
+				const valueForCopy = isSpendColumn ? noSpaces : noSpaces.replace(/,/g, '.');
+				rowData.push(valueForCopy);
+			}
             dataToCopy += rowData.join('\t') + '\n';
         }
     }
