@@ -58,7 +58,7 @@
         "ask/ask.html",
         "ask/ask.css",
         "ask/ask.js",
-        "image/github-logo.svg",
+        "image/*",
         "inject.js",
         "finreport/reports.html",
         "finreport/scripts/preload.js",
