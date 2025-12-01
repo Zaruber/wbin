@@ -16,7 +16,7 @@ try {
       }
     }
   });
-} catch (_) {}
+} catch (_) { }
 
 // Дожидается появления токена в chrome.storage.local, если его ещё нет
 async function waitForAuthorizeToken(timeoutMs = 5000) {
@@ -34,7 +34,7 @@ async function waitForAuthorizeToken(timeoutMs = 5000) {
     const timer = setTimeout(() => {
       try {
         chrome.storage?.onChanged?.removeListener(listener);
-      } catch (_) {}
+      } catch (_) { }
       finish();
     }, timeoutMs);
 
@@ -44,14 +44,14 @@ async function waitForAuthorizeToken(timeoutMs = 5000) {
         clearTimeout(timer);
         try {
           chrome.storage?.onChanged?.removeListener(listener);
-        } catch (_) {}
+        } catch (_) { }
         finish();
       }
     };
 
     try {
       chrome.storage?.onChanged?.addListener(listener);
-    } catch (_) {}
+    } catch (_) { }
 
     // Дополнительно повторно читаем storage на случай, если токен уже пришёл
     try {
@@ -61,11 +61,11 @@ async function waitForAuthorizeToken(timeoutMs = 5000) {
           clearTimeout(timer);
           try {
             chrome.storage?.onChanged?.removeListener(listener);
-          } catch (_) {}
+          } catch (_) { }
           finish();
         }
       });
-    } catch (_) {}
+    } catch (_) { }
   });
 }
 
@@ -350,6 +350,27 @@ function onRowSelectChange(e) {
 
 function updateSelectionInfo() {
   document.getElementById('selCount').textContent = String(state.selectedIds.size);
+
+  let totalSales = 0;
+  let totalLogistics = 0;
+  let totalStorage = 0;
+
+  // Iterate over all loaded items to find selected ones
+  // Note: state.loadedItems contains all items loaded so far, not just the current page
+  // We need to check if the item's ID is in state.selectedIds
+  for (const item of state.loadedItems) {
+    const id = item.id || item.reportId || item.uid || item.uuid || item.ID;
+    if (id && state.selectedIds.has(String(id))) {
+      totalSales += num(pickSales(item));
+      totalLogistics += num(pickLogisticsCost(item));
+      totalStorage += num(pickStorageCost(item));
+    }
+  }
+
+  document.getElementById('sumSales').textContent = money(totalSales);
+  document.getElementById('sumLogistics').textContent = money(totalLogistics);
+  document.getElementById('sumStorage').textContent = money(totalStorage);
+
   const all = document.getElementById('selectAllToggle');
   if (all) {
     const pageIds = (state.lastItems || [])
@@ -1129,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ждём до 5с токен AuthorizeV3, чтобы избежать 401 на первом запросе
   try {
     await waitForAuthorizeToken(5000);
-  } catch (_) {}
+  } catch (_) { }
   bind();
   loadNext();
 });
