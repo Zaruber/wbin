@@ -63,6 +63,7 @@
         "finreport/reports.html",
         "finreport/scripts/preload.js",
         "finreport/scripts/reports.js",
+        "finreport/scripts/xlsx.full.min.js",
         "finreport/styles/reports.css",
         "finreport/pngwing.com.png",
         "finreport/Telegram_logo.svg",

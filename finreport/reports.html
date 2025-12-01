@@ -6,6 +6,8 @@
     <title>Finreport — недельные отчеты</title>
     <link rel="stylesheet" href="styles/reports.css" />
     <script defer src="scripts/preload.js"></script>
+    <script defer src="scripts/jszip.min.js"></script>
+    <script defer src="scripts/xlsx.full.min.js"></script>
     <script defer src="scripts/reports.js"></script>
   </head>
   <body>
@@ -90,6 +92,20 @@
         <div id="sentinel" style="height: 24px;"></div>
       </section>
     </main>
+    <div id="reportModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Просмотр отчета</h2>
+          <button id="modalClose" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="modalTableContainer"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="copyModalTable" class="btn primary">Копировать таблицу</button>
+        </div>
+      </div>
+    </div>
   </body>
   </html>
 
