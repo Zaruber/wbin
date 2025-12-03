@@ -63,6 +63,8 @@
         <button id="selectAllOnPage" class="btn">Выбрать все на странице</button>
         <button id="clearSelection" class="btn">Снять выбор</button>
         <button id="downloadSelectedZip" class="btn primary">Скачать выбранные ZIP</button>
+        <button id="mergeSelected" class="btn primary" style="background-color: #8e44ad;">Объединить и
+          просмотреть</button>
       </div>
     </section>
     <section>
@@ -107,7 +109,7 @@
         <button id="modalClose" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <div id="modalTableContainer"></div>
+        <div id="modalTableContainer" style="overflow: auto; max-height: 70vh;"></div>
       </div>
       <div class="modal-footer">
         <button id="copyModalTable" class="btn primary">Копировать таблицу</button>

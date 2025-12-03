@@ -308,8 +308,9 @@ function renderRows(items) {
       <td>${money(pickTotalToPay(it))}</td>
       <td>${pickCurrency(it)}</td>
       <td>${computeType(it)}</td>
-      <td>
+      <td style="display: flex; gap: 5px;">
         <button class="btn btn-sm" data-action="download" data-id="${id}">Скачать</button>
+        <button class="btn btn-sm" data-action="view" data-id="${id}" style="background-color: #2ecc71;">Просмотр</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -597,34 +598,142 @@ async function getReportBlob(id, type) {
 }
 
 async function viewReport(id) {
-  const result = await getReportBlob(id, 'zip');
-  if (!result || !result.blob) {
-    alert('Не удалось получить архив отчета.');
-    return;
-  }
+  const modal = document.getElementById('reportModal');
+  const container = document.getElementById('modalTableContainer');
+  const title = document.getElementById('modalTitle');
+
+  title.textContent = `Отчет №${id}`;
+  container.innerHTML = '<div style="padding: 20px; text-align: center;">Загрузка...</div>';
+  modal.style.display = 'block';
 
   try {
-    const zip = await JSZip.loadAsync(result.blob);
-    const files = Object.values(zip.files).filter(file => !file.dir);
-    if (files.length === 0) {
-      alert('Архив пуст.');
+    const result = await getReportBlob(id, 'zip');
+    if (!result || !result.blob) {
+      container.innerHTML = '<div style="padding: 20px; color: red;">Не удалось получить архив отчета.</div>';
       return;
     }
 
-    const firstFile = files[0];
-    const content = await firstFile.async('string');
-
-    const newTab = window.open();
-    newTab.document.write(
-      '<html lang="ru"><head><title>Просмотр отчета</title><meta charset="UTF-8"></head><body><pre>' +
-      content.replace(/</g, "&lt;").replace(/>/g, "&gt;") +
-      '</pre></body></html>'
-    );
-    newTab.document.close();
+    const data = await parseXlsxFromZip(result.blob);
+    renderTableInModal(data);
   } catch (e) {
-    console.error('Ошибка при распаковке или отображении отчета:', e);
-    alert('Ошибка при распаковке архива. Возможно, он поврежден или имеет неизвестный формат.');
+    console.error(e);
+    container.innerHTML = `<div style="padding: 20px; color: red;">Ошибка: ${e.message}</div>`;
   }
+}
+
+async function mergeReports(ids) {
+  const modal = document.getElementById('reportModal');
+  const container = document.getElementById('modalTableContainer');
+  const title = document.getElementById('modalTitle');
+
+  title.textContent = `Объединенный отчет (${ids.length} шт.)`;
+  container.innerHTML = '<div style="padding: 20px; text-align: center;">Загрузка и объединение...</div>';
+  modal.style.display = 'block';
+
+  try {
+    const combined = [];
+    let header = null;
+    let count = 0;
+
+    for (const id of ids) {
+      try {
+        const result = await getReportBlob(id, 'zip');
+        if (result && result.blob) {
+          const rows = await parseXlsxFromZip(result.blob);
+          if (rows && rows.length > 0) {
+            if (!header) {
+              header = rows[0];
+              combined.push(header);
+              combined.push(...rows.slice(1));
+            } else {
+              // Добавляем строки, пропуская заголовок
+              combined.push(...rows.slice(1));
+            }
+            count++;
+          }
+        }
+      } catch (err) {
+        console.error(`Failed to load report ${id}`, err);
+      }
+    }
+
+    if (count === 0) {
+      container.innerHTML = '<div style="padding: 20px;">Не удалось загрузить данные ни из одного отчета.</div>';
+      return;
+    }
+
+    renderTableInModal(combined);
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = `<div style="padding: 20px; color: red;">Ошибка: ${e.message}</div>`;
+  }
+}
+
+async function parseXlsxFromZip(blob) {
+  const zip = await JSZip.loadAsync(blob);
+  // Ищем первый xlsx файл
+  const files = Object.values(zip.files).filter(file => !file.dir && !file.name.startsWith('__MACOSX') && /\.xlsx$/i.test(file.name));
+  if (files.length === 0) {
+    throw new Error('XLSX файл не найден в архиве');
+  }
+  const fileData = await files[0].async('arraybuffer');
+  const workbook = XLSX.read(fileData, { type: 'array' });
+  if (!workbook.SheetNames.length) {
+    throw new Error('XLSX файл пуст');
+  }
+  const firstSheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[firstSheetName];
+  return XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+}
+
+function renderTableInModal(data) {
+  const container = document.getElementById('modalTableContainer');
+  if (!data || data.length === 0) {
+    container.innerHTML = '<div style="padding: 20px;">Нет данных</div>';
+    return;
+  }
+
+  let html = '<table class="table" style="width:100%; border-collapse: collapse; font-size: 12px;">';
+  // Header
+  html += '<thead><tr>';
+  data[0].forEach(cell => {
+    html += `<th style="border: 1px solid #ddd; padding: 5px; background: #f2f2f2; position: sticky; top: 0;">${cell}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  // Body
+  for (let i = 1; i < data.length; i++) {
+    html += '<tr>';
+    data[i].forEach(cell => {
+      html += `<td style="border: 1px solid #ddd; padding: 5px;">${cell !== undefined ? cell : ''}</td>`;
+    });
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function copyTableToClipboard() {
+  const table = document.querySelector('#modalTableContainer table');
+  if (!table) return;
+
+  let text = '';
+  // Используем innerText для получения видимого текста, но лучше пройтись по данным
+  // Чтобы сохранить структуру, пройдемся по строкам
+  for (const row of table.rows) {
+    const cells = Array.from(row.cells).map(c => c.innerText.replace(/(\r\n|\n|\r)/gm, " ").trim());
+    text += cells.join('\t') + '\n';
+  }
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyModalTable');
+    const originalText = btn.textContent;
+    btn.textContent = 'Скопировано!';
+    setTimeout(() => btn.textContent = originalText, 2000);
+  }).catch(err => {
+    console.error('Failed to copy', err);
+    alert('Не удалось скопировать');
+  });
 }
 
 async function downloadReport(id, type) {
@@ -1093,6 +1202,38 @@ function bind() {
       }
     });
   }
+
+  const btnMerge = document.getElementById('mergeSelected');
+  if (btnMerge) {
+    btnMerge.addEventListener('click', () => {
+      if (state.selectedIds.size === 0) {
+        alert('Не выбрано ни одного отчета');
+        return;
+      }
+      const ids = [...state.selectedIds];
+      mergeReports(ids);
+    });
+  }
+
+  const modalClose = document.getElementById('modalClose');
+  if (modalClose) {
+    modalClose.addEventListener('click', () => {
+      document.getElementById('reportModal').style.display = 'none';
+    });
+  }
+
+  const copyBtn = document.getElementById('copyModalTable');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', copyTableToClipboard);
+  }
+
+  // Закрытие по клику вне модального окна
+  window.addEventListener('click', (e) => {
+    const modal = document.getElementById('reportModal');
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
 
   document.getElementById('selectAllToggle').addEventListener('change', async (e) => {
     const checked = e.target.checked;
