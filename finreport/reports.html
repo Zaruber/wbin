@@ -52,19 +52,43 @@
   <main class="main">
 
     <section class="bulk-actions">
-      <div class="sel-info">Выбрано: <span id="selCount">0</span></div>
-      <div class="sel-summary" style="margin-left: 20px; font-size: 14px; display: flex; gap: 15px;">
-        <div>Продажа: <span id="sumSales" style="font-weight: bold;">0,00</span></div>
-        <div>Логистика: <span id="sumLogistics" style="font-weight: bold;">0,00</span></div>
-        <div>Хранение: <span id="sumStorage" style="font-weight: bold;">0,00</span></div>
+      <div class="sel-info-block">
+        <span style="font-weight: 600; color: #8a8a8e;">Выбрано:</span>
+        <span id="selCount" class="sel-count-badge">0</span>
+      </div>
+      <div class="sel-summary">
+        <div class="summary-card">
+          <span class="summary-label">Продажа</span>
+          <span id="sumSales" class="summary-value">0,00</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label" style="color: #34c759;">К перечислению</span>
+          <span id="sumToTransfer" class="summary-value" style="color: #34c759;">0,00</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label" style="color: #0a84ff;">К оплате</span>
+          <span id="sumToPay" class="summary-value" style="color: #0a84ff;">0,00</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Логистика</span>
+          <span id="sumLogistics" class="summary-value">0,00</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Хранение</span>
+          <span id="sumStorage" class="summary-value">0,00</span>
+        </div>
       </div>
       <div class="sel-actions">
-        <button id="reload" class="btn">Обновить</button>
-        <button id="selectAllOnPage" class="btn">Выбрать все на странице</button>
-        <button id="clearSelection" class="btn">Снять выбор</button>
-        <button id="downloadSelectedZip" class="btn primary">Скачать выбранные ZIP</button>
-        <button id="mergeSelected" class="btn primary" style="background-color: #8e44ad;">Объединить и
-          просмотреть</button>
+        <div class="btn-group">
+          <button id="reload" class="btn" title="Обновить список">↻</button>
+          <button id="selectAllOnPage" class="btn">Выбрать все</button>
+          <button id="clearSelection" class="btn">Снять выбор</button>
+        </div>
+        <div class="vr-separator"></div>
+        <div class="btn-group">
+          <button id="downloadSelectedZip" class="btn primary">Скачать ZIP</button>
+          <button id="mergeSelected" class="btn primary" style="background-color: #8e44ad;">Объединить</button>
+        </div>
       </div>
     </section>
     <section>

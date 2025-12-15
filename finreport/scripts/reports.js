@@ -355,6 +355,8 @@ function updateSelectionInfo() {
   let totalSales = 0;
   let totalLogistics = 0;
   let totalStorage = 0;
+  let totalToTransfer = 0;
+  let totalToPay = 0;
 
   // Iterate over all loaded items to find selected ones
   // Note: state.loadedItems contains all items loaded so far, not just the current page
@@ -365,12 +367,24 @@ function updateSelectionInfo() {
       totalSales += num(pickSales(item));
       totalLogistics += num(pickLogisticsCost(item));
       totalStorage += num(pickStorageCost(item));
+      totalToTransfer += num(pickToBeTransferred(item));
+      totalToPay += num(pickTotalToPay(item));
     }
   }
 
   document.getElementById('sumSales').textContent = money(totalSales);
   document.getElementById('sumLogistics').textContent = money(totalLogistics);
   document.getElementById('sumStorage').textContent = money(totalStorage);
+
+  const elTransfer = document.getElementById('sumToTransfer');
+  if (elTransfer) {
+    elTransfer.textContent = money(totalToTransfer);
+  }
+
+  const elToPay = document.getElementById('sumToPay');
+  if (elToPay) {
+    elToPay.textContent = money(totalToPay);
+  }
 
   const all = document.getElementById('selectAllToggle');
   if (all) {
