@@ -1334,9 +1334,154 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await waitForAuthorizeToken(5000);
   } catch (_) { }
+  bindTooltips();
   bind();
   loadNext();
 });
+
+const TOOLTIP_DATA = {
+  sales: [
+    `<h4>Продажа</h4>
+     <p>Покупатель выкупил товар.</p>`
+  ],
+  transfer: [
+    `<h4>К перечислению — стр. 1/2</h4>
+     <p>Сумма, которую Wildberries начисляет продавцу за продажу конкретного товара.</p>
+     <p>Эту же сумму Wildberries удерживает, если покупатель вернул товар.</p>
+     <p>Из этой суммы уже вычли комиссию.</p>`,
+
+    `<h4>К перечислению — стр. 2/2</h4>
+     <p><b>Как рассчитывается:</b><br>
+     «Цена розничная с учётом согласованной скидки»<br>
+     − «Размер кВВ, %»<br>
+     − «Эквайринг/Комиссия за организацию платежей»</p>`
+  ],
+  pay: [
+    `<h4>Итого к оплате — стр. 1/2</h4>
+     <p>Доход продавца за отчётную неделю после всех удержаний.</p>`,
+
+    `<h4>Итого к оплате — стр. 2/2</h4>
+     <p><b>Проверка суммы:</b><br>
+     («К перечислению» (Продажа) − «К перечислению» (Возврат))<br>
+     − Логистика − Хранение − Приёмка − Штрафы − Комиссия за кешбэк − Сумма кешбэка − Прочие удержания<br>
+     + Компенсация скидки СПП</p>`
+  ],
+  logistics: [
+    `<h4>Логистика</h4>
+     <p>Доставка товара по одному из направлений:</p>
+     <ul>
+       <li>со склада в ПВЗ покупателя</li>
+       <li>из ПВЗ покупателя на склад</li>
+       <li>со склада в ПВЗ продавца</li>
+     </ul>`
+  ],
+  storage: [
+    `<h4>Хранение</h4>
+     <p>Итоговая оплата хранения товара на складах, считается за неделю.</p>
+     <p>Подробная информация есть в разделе «Аналитика» → Отчёты → <a href="https://seller.wildberries.ru/analytics-reports/paid-storage/storage" target="_blank">Платное хранение</a>.</p>`
+  ]
+};
+
+let currentTooltipKey = null;
+let currentTooltipPage = 0;
+
+function bindTooltips() {
+  const cards = document.querySelectorAll('.summary-card[data-tooltip-key]');
+  const popover = document.getElementById('summaryTooltip');
+  const closeBtn = popover.querySelector('.tooltip-close');
+  const prevBtn = popover.querySelector('.tooltip-prev');
+  const nextBtn = popover.querySelector('.tooltip-next');
+
+  cards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = card.getAttribute('data-tooltip-key');
+      showTooltip(key, card);
+    });
+  });
+
+  closeBtn.addEventListener('click', hideTooltip);
+
+  document.addEventListener('click', (e) => {
+    if (popover.style.display !== 'none' && !popover.contains(e.target)) {
+      hideTooltip();
+    }
+  });
+
+  // Prevent closing when clicking inside tooltip
+  popover.addEventListener('click', e => e.stopPropagation());
+
+  prevBtn.addEventListener('click', () => {
+    if (currentTooltipPage > 0) {
+      currentTooltipPage--;
+      renderTooltipPage();
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    const pages = TOOLTIP_DATA[currentTooltipKey] || [];
+    if (currentTooltipPage < pages.length - 1) {
+      currentTooltipPage++;
+      renderTooltipPage();
+    }
+  });
+}
+
+function showTooltip(key, targetEl) {
+  const popover = document.getElementById('summaryTooltip');
+  if (!TOOLTIP_DATA[key]) return;
+
+  currentTooltipKey = key;
+  currentTooltipPage = 0;
+
+  renderTooltipPage();
+
+  popover.style.display = 'flex';
+
+  // Positioning
+  const rect = targetEl.getBoundingClientRect();
+  const popRect = popover.getBoundingClientRect();
+
+  let top = rect.bottom + 8 + window.scrollY;
+  let left = rect.left + window.scrollX;
+
+  // Adjust if goes off screen
+  if (left + popRect.width > window.innerWidth - 20) {
+    left = window.innerWidth - popRect.width - 20;
+  }
+
+  popover.style.top = `${top}px`;
+  popover.style.left = `${left}px`;
+}
+
+function hideTooltip() {
+  document.getElementById('summaryTooltip').style.display = 'none';
+  currentTooltipKey = null;
+}
+
+function renderTooltipPage() {
+  const popover = document.getElementById('summaryTooltip');
+  const contentEl = popover.querySelector('.tooltip-content');
+  const pages = TOOLTIP_DATA[currentTooltipKey] || [];
+  const pageContent = pages[currentTooltipPage];
+
+  contentEl.innerHTML = pageContent;
+
+  // Update pagination controls
+  const prevBtn = popover.querySelector('.tooltip-prev');
+  const nextBtn = popover.querySelector('.tooltip-next');
+  const pagLabel = popover.querySelector('.tooltip-pagination');
+
+  prevBtn.disabled = currentTooltipPage === 0;
+  nextBtn.disabled = currentTooltipPage === pages.length - 1;
+
+  if (pages.length > 1) {
+    pagLabel.textContent = `${currentTooltipPage + 1} / ${pages.length}`;
+    popover.querySelector('.tooltip-footer').style.display = 'flex';
+  } else {
+    popover.querySelector('.tooltip-footer').style.display = 'none';
+  }
+}
 
 // Ограничиваем массовые скачивания по батчам
 async function runBatched(ids, worker, batchSize = 3) {

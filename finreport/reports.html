@@ -57,23 +57,23 @@
         <span id="selCount" class="sel-count-badge">0</span>
       </div>
       <div class="sel-summary">
-        <div class="summary-card">
+        <div class="summary-card" data-tooltip-key="sales">
           <span class="summary-label">Продажа</span>
           <span id="sumSales" class="summary-value">0,00</span>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" data-tooltip-key="transfer">
           <span class="summary-label" style="color: #34c759;">К перечислению</span>
           <span id="sumToTransfer" class="summary-value" style="color: #34c759;">0,00</span>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" data-tooltip-key="pay">
           <span class="summary-label" style="color: #0a84ff;">К оплате</span>
           <span id="sumToPay" class="summary-value" style="color: #0a84ff;">0,00</span>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" data-tooltip-key="logistics">
           <span class="summary-label">Логистика</span>
           <span id="sumLogistics" class="summary-value">0,00</span>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" data-tooltip-key="storage">
           <span class="summary-label">Хранение</span>
           <span id="sumStorage" class="summary-value">0,00</span>
         </div>
@@ -139,6 +139,15 @@
         <button id="downloadModalReport" class="btn" style="margin-right: 10px;">Скачать отчет</button>
         <button id="copyModalTable" class="btn primary">Копировать таблицу</button>
       </div>
+    </div>
+  </div>
+  <div id="summaryTooltip" class="tooltip-popover" style="display: none;">
+    <button class="tooltip-close">&times;</button>
+    <div class="tooltip-content"></div>
+    <div class="tooltip-footer">
+      <button class="tooltip-prev" disabled>&larr;</button>
+      <span class="tooltip-pagination"></span>
+      <button class="tooltip-next">&rarr;</button>
     </div>
   </div>
 </body>
