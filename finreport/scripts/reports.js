@@ -693,6 +693,13 @@ function renderTableInModal(data) {
     return;
   }
 
+  const formatCell = (val) => {
+    if (typeof val === 'number') {
+      return String(val).replace('.', ',');
+    }
+    return val !== undefined ? val : '';
+  };
+
   let html = '<table class="table" style="width:100%; border-collapse: collapse; font-size: 12px;">';
   // Header
   html += '<thead><tr>';
@@ -705,7 +712,7 @@ function renderTableInModal(data) {
   for (let i = 1; i < data.length; i++) {
     html += '<tr>';
     data[i].forEach(cell => {
-      html += `<td style="border: 1px solid #ddd; padding: 5px;">${cell !== undefined ? cell : ''}</td>`;
+      html += `<td style="border: 1px solid #ddd; padding: 5px;">${formatCell(cell)}</td>`;
     });
     html += '</tr>';
   }
@@ -1225,6 +1232,27 @@ function bind() {
   const copyBtn = document.getElementById('copyModalTable');
   if (copyBtn) {
     copyBtn.addEventListener('click', copyTableToClipboard);
+  }
+
+  const downloadModalBtn = document.getElementById('downloadModalReport');
+  if (downloadModalBtn) {
+    downloadModalBtn.addEventListener('click', () => {
+      const table = document.querySelector('#modalTableContainer table');
+      if (!table) {
+        alert('Нет данных для скачивания');
+        return;
+      }
+      try {
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+        const title = document.getElementById('modalTitle').textContent || 'report';
+        // Clean title for filename
+        const filename = title.replace(/[^a-zA-Z0-9а-яА-ЯёЁ№()_. \-]/g, '').trim() + '.xlsx';
+        XLSX.writeFile(wb, filename);
+      } catch (e) {
+        console.error('Download failed', e);
+        alert('Ошибка при скачивании: ' + e.message);
+      }
+    });
   }
 
   // Закрытие по клику вне модального окна
