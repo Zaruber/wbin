@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Принудительно устанавливаем размеры попапа
     function setPopupDimensions() {
         document.documentElement.style.width = '400px';
@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.maxWidth = '400px';
         document.documentElement.style.minHeight = '500px';
         document.documentElement.style.maxHeight = '600px';
-        
+
         document.body.style.width = '400px';
         document.body.style.minWidth = '400px';
         document.body.style.maxWidth = '400px';
@@ -14,34 +14,34 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.maxHeight = '600px';
         document.body.style.overflow = 'visible';
     }
-    
+
     // Устанавливаем размеры сразу
     setPopupDimensions();
-    
+
     // Повторяем через небольшую задержку для надежности
     setTimeout(setPopupDimensions, 100);
     // Управление feature items
     const featureItems = document.querySelectorAll('.feature-item');
-    
+
     // Добавляем data-feature атрибуты к feature items
     const campaignsFeature = document.querySelector('.feature-item:nth-child(1)');
     const statisticsFeature = document.querySelector('.feature-item:nth-child(2)');
     const askFeature = document.querySelector('.feature-item:nth-child(3)');
     const financialFeature = document.querySelector('.feature-item:nth-child(4)');
-    
+
     if (campaignsFeature) campaignsFeature.setAttribute('data-feature', 'campaigns');
     if (statisticsFeature) statisticsFeature.setAttribute('data-feature', 'statistics');
     if (askFeature) askFeature.setAttribute('data-feature', 'ask');
     if (financialFeature) financialFeature.setAttribute('data-feature', 'financial');
-    
+
     // Функции для каждого типа отчета
     function handleCampaignsReport() {
         setFeatureLoading(campaignsFeature, 'Загрузка...');
-        
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             const currentTab = tabs[0];
             if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru/campaigns/list')) {
-                chrome.runtime.sendMessage({ action: 'generateReport', type: 'campaigns' }, function(response) {
+                chrome.runtime.sendMessage({ action: 'generateReport', type: 'campaigns' }, function (response) {
                     setFeatureSuccess(campaignsFeature, 'Готово!');
                     setTimeout(() => {
                         window.close();
@@ -53,14 +53,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     function handleStatisticsReport() {
         setFeatureLoading(statisticsFeature, 'Загрузка...');
-        
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             const currentTab = tabs[0];
             if (currentTab && currentTab.url && currentTab.url.includes('cmp.wildberries.ru/campaigns/statistics')) {
-                chrome.runtime.sendMessage({ action: 'generateReport', type: 'statistics' }, function(response) {
+                chrome.runtime.sendMessage({ action: 'generateReport', type: 'statistics' }, function (response) {
                     setFeatureSuccess(statisticsFeature, 'Готово!');
                     setTimeout(() => {
                         window.close();
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     function handleAskReport() {
         setFeatureLoading(askFeature, 'Открытие...');
         chrome.tabs.create({ url: chrome.runtime.getURL('ask/ask.html') });
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.close();
         }, 500);
     }
-    
+
     function handleFinancialReport() {
         setFeatureLoading(financialFeature, 'Открытие...');
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -97,14 +97,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Добавляем обработчики для feature items
     featureItems.forEach(feature => {
-        feature.addEventListener('click', function() {
+        feature.addEventListener('click', function () {
             const featureType = this.getAttribute('data-feature');
-            
+
             // Выполняем соответствующую функцию
-            switch(featureType) {
+            switch (featureType) {
                 case 'campaigns':
                     handleCampaignsReport();
                     break;
@@ -147,7 +147,7 @@ function setFeatureError(feature, text) {
     }
     feature.classList.remove('loading');
     feature.classList.add('error');
-    
+
     // Сбрасываем состояние через 3 секунды
     setTimeout(() => {
         feature.classList.remove('error');
@@ -160,7 +160,7 @@ function setFeatureError(feature, text) {
 
 function getOriginalFeatureName(feature) {
     const featureType = feature.getAttribute('data-feature');
-    switch(featureType) {
+    switch (featureType) {
         case 'campaigns': return 'Кампании';
         case 'statistics': return 'Статистика';
         case 'ask': return 'АСК Анализ';
@@ -173,7 +173,7 @@ function getOriginalFeatureName(feature) {
 function showNotification(message, type = 'info') {
     // Простая реализация - можно заменить на более продвинутую
     console.log(`[${type.toUpperCase()}] ${message}`);
-    
+
     // Создаем временное уведомление
     const notification = document.createElement('div');
     notification.style.cssText = `
@@ -192,9 +192,9 @@ function showNotification(message, type = 'info') {
         animation: slideIn 0.3s ease;
     `;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => {

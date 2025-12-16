@@ -1,12 +1,13 @@
 /* Reset and Base Styles */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* Chrome Extension Popup Specific Styles */
-html, body {
+html,
+body {
     width: 400px !important;
     min-width: 400px !important;
     max-width: 400px !important;
@@ -17,7 +18,7 @@ html, body {
     color: #ffffff;
     margin: 0;
     padding: 0;
-  overflow-x: hidden;
+    overflow-x: hidden;
     overflow-y: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -26,23 +27,23 @@ html, body {
 
 .app-container {
     min-height: 500px;
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
 
 /* Header */
 .header {
-  display: flex;
+    display: flex;
     justify-content: space-between;
-  align-items: center;
+    align-items: center;
     padding: 16px 24px 8px;
     background: transparent;
 }
 
 .header-left {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .app-logo-compact {
@@ -120,8 +121,8 @@ html, body {
 }
 
 .menu-dots {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
     gap: 3px;
 }
 
@@ -139,9 +140,9 @@ html, body {
     border-radius: 8px;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -167,8 +168,8 @@ html, body {
 }
 
 .feature-item {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
     padding: 18px 20px;
     margin-bottom: 12px;
     background: rgba(255, 255, 255, 0.03);
@@ -195,8 +196,8 @@ html, body {
     height: 44px;
     border-radius: 12px;
     display: flex;
-  align-items: center;
-  justify-content: center;
+    align-items: center;
+    justify-content: center;
     margin-right: 16px;
     background: rgba(255, 255, 255, 0.08);
 }
@@ -227,6 +228,12 @@ html, body {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
     color: #10b981;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.promotions-icon {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0.1) 100%);
+    color: #f97316;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
 }
 
 .feature-info {
@@ -265,23 +272,25 @@ html, body {
     background: rgba(139, 92, 246, 0.7);
 }
 
-.feature-item {
+
 
 /* Responsive adjustments */
 @media (max-width: 400px) {
-    html, body {
+
+    html,
+    body {
         width: 400px !important;
         min-width: 400px !important;
     }
-    
+
     .main-content {
         padding: 0 16px;
     }
-    
+
     .header {
         padding: 16px 20px 12px;
     }
-    
+
     .bottom-nav {
         padding: 12px 20px 16px;
     }

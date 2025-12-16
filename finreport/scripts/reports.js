@@ -355,6 +355,7 @@ function updateSelectionInfo() {
   let totalSales = 0;
   let totalLogistics = 0;
   let totalStorage = 0;
+  let totalPenalties = 0;
   let totalToTransfer = 0;
   let totalToPay = 0;
 
@@ -367,6 +368,7 @@ function updateSelectionInfo() {
       totalSales += num(pickSales(item));
       totalLogistics += num(pickLogisticsCost(item));
       totalStorage += num(pickStorageCost(item));
+      totalPenalties += num(pickTotalPenalties(item));
       totalToTransfer += num(pickToBeTransferred(item));
       totalToPay += num(pickTotalToPay(item));
     }
@@ -375,6 +377,11 @@ function updateSelectionInfo() {
   document.getElementById('sumSales').textContent = money(totalSales);
   document.getElementById('sumLogistics').textContent = money(totalLogistics);
   document.getElementById('sumStorage').textContent = money(totalStorage);
+
+  const elPenalties = document.getElementById('sumPenalties');
+  if (elPenalties) {
+    elPenalties.textContent = money(totalPenalties);
+  }
 
   const elTransfer = document.getElementById('sumToTransfer');
   if (elTransfer) {
@@ -1379,6 +1386,11 @@ const TOOLTIP_DATA = {
     `<h4>Хранение</h4>
      <p>Итоговая оплата хранения товара на складах, считается за неделю.</p>
      <p>Подробная информация есть в разделе «Аналитика» → Отчёты → <a href="https://seller.wildberries.ru/analytics-reports/paid-storage/storage" target="_blank">Платное хранение</a>.</p>`
+  ],
+  penalties: [
+    `<h4>Штрафы</h4>
+     <p>Информацию по штрафам подробно можно получить в Оферте (п.9.8.1) и в приложении к Договору "Перечень штрафов", размещенном по ссылке:</p>
+     <p><a href="https://static-basket-02.wbbasket.ru/vol20/portal/education/instruction/Perechen_shtrafov_po_oferte.pdf?abc=1693486735092" target="_blank">Перечень штрафов (PDF)</a></p>`
   ]
 };
 
@@ -1490,3 +1502,28 @@ async function runBatched(ids, worker, batchSize = 3) {
     await Promise.all(chunk.map(worker));
   }
 }
+
+// --- Sidebar Navigation Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.view-section');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const targetId = item.getAttribute('data-target');
+
+      navItems.forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+
+      sections.forEach(section => {
+        if (section.id === targetId) {
+          section.style.display = 'block';
+          setTimeout(() => section.classList.add('active'), 10);
+        } else {
+          section.style.display = 'none';
+          section.classList.remove('active');
+        }
+      });
+    });
+  });
+});

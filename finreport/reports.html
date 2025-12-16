@@ -13,119 +13,153 @@
 </head>
 
 <body>
-  <header class="header">
-    <div class="promo-grid">
-      <div class="promo-card">
-        <a href="https://zaruber.github.io/zaruberpage/" target="_blank" rel="noopener noreferrer"
-          class="promo-link-block">
-          <img src="pngwing.com.png" alt="Cat" class="promo-avatar">
-          <span class="promo-content">
-            <span class="promo-title">
-              <span>Вот сюда кликнешь</span>
-              <span class="promo-arrow">↗</span>
-            </span>
-            <span class="promo-desc">откроется сайт с полезными инструментами для маркетплейсов</span>
-          </span>
-        </a>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-text">WBin</div>
       </div>
-      <div class="promo-card">
-        <a href="https://t.me/+3g9fjC4OTn03MWYx" target="_blank" rel="noopener noreferrer" class="promo-link-block">
-          <img src="Telegram_logo.svg" alt="Telegram" class="promo-avatar">
-          <span class="promo-content">
-            <span class="promo-title">
-              <span>Вступить в чат</span>
-              <span class="promo-arrow">↗</span>
-            </span>
-            <span class="promo-desc">обновления и вопросы по Finreport</span>
-          </span>
-        </a>
-      </div>
-      <div></div>
-    </div>
-    <div class="hdr-title-wrapper">
-      <div class="hdr-title">Finreport</div>
-      <div class="hdr-subtitle">Удобные финансовые отчеты</div>
-    </div>
-    <div class="hdr-actions">
-    </div>
-  </header>
-  <main class="main">
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-target="view-reports">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Фин.отчеты</span>
+        </button>
+        <button class="nav-item" data-target="view-storage">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">Платное хранение</span>
+        </button>
+      </nav>
+    </aside>
+    <div class="app-content">
+      <header class="header">
+        <div class="promo-grid">
+          <div class="promo-card">
+            <a href="https://zaruber.github.io/zaruberpage/" target="_blank" rel="noopener noreferrer"
+              class="promo-link-block">
+              <img src="pngwing.com.png" alt="Cat" class="promo-avatar">
+              <span class="promo-content">
+                <span class="promo-title">
+                  <span>Вот сюда кликнешь</span>
+                  <span class="promo-arrow">↗</span>
+                </span>
+                <span class="promo-desc">откроется сайт с полезными инструментами для маркетплейсов</span>
+              </span>
+            </a>
+          </div>
+          <div class="promo-card">
+            <a href="https://t.me/+3g9fjC4OTn03MWYx" target="_blank" rel="noopener noreferrer" class="promo-link-block">
+              <img src="Telegram_logo.svg" alt="Telegram" class="promo-avatar">
+              <span class="promo-content">
+                <span class="promo-title">
+                  <span>Вступить в чат</span>
+                  <span class="promo-arrow">↗</span>
+                </span>
+                <span class="promo-desc">обновления и вопросы по Finreport</span>
+              </span>
+            </a>
+          </div>
+          <div></div>
+        </div>
+        <div class="hdr-title-wrapper">
+          <div class="hdr-title">Finreport</div>
+          <div class="hdr-subtitle">Удобные финансовые отчеты</div>
+        </div>
+        <div class="hdr-actions">
+        </div>
+      </header>
+      <main class="main">
 
-    <section class="bulk-actions">
-      <div class="sel-info-block">
-        <span style="font-weight: 600; color: #8a8a8e;">Выбрано:</span>
-        <span id="selCount" class="sel-count-badge">0</span>
-      </div>
-      <div class="sel-summary">
-        <div class="summary-card" data-tooltip-key="sales">
-          <span class="summary-label">Продажа</span>
-          <span id="sumSales" class="summary-value">0,00</span>
+        <div id="view-reports" class="view-section active">
+          <section class="bulk-actions">
+            <div class="sel-info-block">
+              <span style="font-weight: 600; color: #8a8a8e;">Выбрано:</span>
+              <span id="selCount" class="sel-count-badge">0</span>
+            </div>
+            <div class="sel-summary">
+              <div class="summary-card" data-tooltip-key="sales">
+                <span class="summary-label">Продажа</span>
+                <span id="sumSales" class="summary-value">0,00</span>
+              </div>
+              <div class="summary-card" data-tooltip-key="transfer">
+                <span class="summary-label" style="color: #34c759;">К перечислению</span>
+                <span id="sumToTransfer" class="summary-value" style="color: #34c759;">0,00</span>
+              </div>
+              <div class="summary-card" data-tooltip-key="pay">
+                <span class="summary-label" style="color: #0a84ff;">К оплате</span>
+                <span id="sumToPay" class="summary-value" style="color: #0a84ff;">0,00</span>
+              </div>
+              <div class="summary-card" data-tooltip-key="logistics">
+                <span class="summary-label">Логистика</span>
+                <span id="sumLogistics" class="summary-value">0,00</span>
+              </div>
+              <div class="summary-card" data-tooltip-key="storage">
+                <span class="summary-label">Хранение</span>
+                <span id="sumStorage" class="summary-value">0,00</span>
+              </div>
+              <div class="summary-card" data-tooltip-key="penalties">
+                <span class="summary-label" style="color: #ff3b30;">Штрафы</span>
+                <span id="sumPenalties" class="summary-value" style="color: #ff3b30;">0,00</span>
+              </div>
+            </div>
+            <div class="sel-actions">
+              <div class="btn-group">
+                <button id="reload" class="btn" title="Обновить список">↻</button>
+                <button id="selectAllOnPage" class="btn">Выбрать все</button>
+                <button id="clearSelection" class="btn">Снять выбор</button>
+              </div>
+              <div class="vr-separator"></div>
+              <div class="btn-group">
+                <button id="downloadSelectedZip" class="btn primary">Скачать ZIP</button>
+                <button id="mergeSelected" class="btn primary" style="background-color: #8e44ad;">Объединить</button>
+              </div>
+            </div>
+          </section>
+          <section>
+            <div class="table-container">
+              <table class="table" id="reportsTable">
+                <thead>
+                  <tr>
+                    <th><input type="checkbox" id="selectAllToggle" /></th>
+                    <th>№</th>
+                    <th>Юридическое лицо</th>
+                    <th>Период</th>
+                    <th>Дата формирования</th>
+                    <th>Продажа</th>
+                    <th>Скидка %</th>
+                    <th>К перечислению</th>
+                    <th>Логистика</th>
+                    <th>Штраф лог.</th>
+                    <th>Штраф обмер</th>
+                    <th>Прочие штрафы</th>
+                    <th>Всего штрафов</th>
+                    <th>Корректировка</th>
+                    <th>WB комиссия</th>
+                    <th>Хранение</th>
+                    <th>Приемка</th>
+                    <th>Удержания</th>
+                    <th>К оплате</th>
+                    <th>Валюта</th>
+                    <th>Тип</th>
+                    <th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+              </table>
+            </div>
+            <div id="sentinel" style="height: 24px;"></div>
+          </section>
         </div>
-        <div class="summary-card" data-tooltip-key="transfer">
-          <span class="summary-label" style="color: #34c759;">К перечислению</span>
-          <span id="sumToTransfer" class="summary-value" style="color: #34c759;">0,00</span>
+
+        <div id="view-storage" class="view-section" style="display: none;">
+          <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>Платное хранение</h3>
+            <p>Раздел находится в разработке и скоро станет доступен.</p>
+          </div>
         </div>
-        <div class="summary-card" data-tooltip-key="pay">
-          <span class="summary-label" style="color: #0a84ff;">К оплате</span>
-          <span id="sumToPay" class="summary-value" style="color: #0a84ff;">0,00</span>
-        </div>
-        <div class="summary-card" data-tooltip-key="logistics">
-          <span class="summary-label">Логистика</span>
-          <span id="sumLogistics" class="summary-value">0,00</span>
-        </div>
-        <div class="summary-card" data-tooltip-key="storage">
-          <span class="summary-label">Хранение</span>
-          <span id="sumStorage" class="summary-value">0,00</span>
-        </div>
-      </div>
-      <div class="sel-actions">
-        <div class="btn-group">
-          <button id="reload" class="btn" title="Обновить список">↻</button>
-          <button id="selectAllOnPage" class="btn">Выбрать все</button>
-          <button id="clearSelection" class="btn">Снять выбор</button>
-        </div>
-        <div class="vr-separator"></div>
-        <div class="btn-group">
-          <button id="downloadSelectedZip" class="btn primary">Скачать ZIP</button>
-          <button id="mergeSelected" class="btn primary" style="background-color: #8e44ad;">Объединить</button>
-        </div>
-      </div>
-    </section>
-    <section>
-      <div class="table-container">
-        <table class="table" id="reportsTable">
-          <thead>
-            <tr>
-              <th><input type="checkbox" id="selectAllToggle" /></th>
-              <th>№</th>
-              <th>Юридическое лицо</th>
-              <th>Период</th>
-              <th>Дата формирования</th>
-              <th>Продажа</th>
-              <th>Скидка %</th>
-              <th>К перечислению</th>
-              <th>Логистика</th>
-              <th>Штраф лог.</th>
-              <th>Штраф обмер</th>
-              <th>Прочие штрафы</th>
-              <th>Всего штрафов</th>
-              <th>Корректировка</th>
-              <th>WB комиссия</th>
-              <th>Хранение</th>
-              <th>Приемка</th>
-              <th>Удержания</th>
-              <th>К оплате</th>
-              <th>Валюта</th>
-              <th>Тип</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-      <div id="sentinel" style="height: 24px;"></div>
-    </section>
-  </main>
+
+      </main>
+    </div>
+  </div>
   <div id="reportModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">

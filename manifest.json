@@ -14,8 +14,7 @@
     "tabs",
     "activeTab",
     "scripting",
-    "storage",
-    "cookies"
+    "storage"
   ],
   "host_permissions": [
     "https://cmp.wildberries.ru/*",
@@ -28,13 +27,21 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://cmp.wildberries.ru/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://cmp.wildberries.ru/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_start"
     },
     {
-      "matches": ["https://seller.wildberries.ru/*"],
-      "js": ["finreport/content/injector.js"],
+      "matches": [
+        "https://seller.wildberries.ru/*"
+      ],
+      "js": [
+        "finreport/content/injector.js"
+      ],
       "run_at": "document_start"
     }
   ],
@@ -69,7 +76,9 @@
         "finreport/Telegram_logo.svg",
         "finreport/content/page-hook.js"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
-} 
+}

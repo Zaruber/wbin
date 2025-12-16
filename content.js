@@ -2,8 +2,8 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'captureRequest') {
     // Проверяем, находимся ли мы на нужных страницах
-    if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/list/all') || 
-        window.location.href.includes('https://cmp.wildberries.ru/campaigns/statistics/all')) {
+    if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/list/all') ||
+      window.location.href.includes('https://cmp.wildberries.ru/campaigns/statistics/all')) {
       sendResponse({ status: 'ready' });
     }
   }
@@ -17,7 +17,7 @@ if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/statisti
   function injectAskScript() {
     const script = document.createElement('script');
     script.src = chrome.runtime.getURL('inject.js');
-    script.onload = function() {
+    script.onload = function () {
       console.log('WBin АСК: inject.js загружен');
       this.remove(); // После загрузки удаляем тег script
     };
@@ -29,15 +29,15 @@ if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/statisti
   injectAskScript();
 
   // Слушаем сообщения от инжектированного скрипта
-  window.addEventListener('message', function(event) {
+  window.addEventListener('message', function (event) {
     // Проверяем источник сообщения
-    if (event.source === window && 
-        event.data && 
-        event.data.source === 'wbin-ask-inject' && 
-        event.data.action === 'askApiDataCaptured') {
-      
+    if (event.source === window &&
+      event.data &&
+      event.data.source === 'wbin-ask-inject' &&
+      event.data.action === 'askApiDataCaptured') {
+
       console.log('WBin АСК: получены данные API от инжектированного скрипта');
-      
+
       // Передаем данные в фоновый скрипт
       chrome.runtime.sendMessage({
         action: 'askApiDataIntercepted',
@@ -49,11 +49,11 @@ if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/statisti
   });
 
   // Уведомляем background script о загрузке страницы АСК
-  chrome.runtime.sendMessage({ 
+  chrome.runtime.sendMessage({
     action: 'askPageLoaded',
     url: window.location.href
   });
-} 
+}
 
 // Инициализация перехвата для страницы списка кампаний
 if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/list')) {
@@ -63,7 +63,7 @@ if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/list')) 
   function injectCampaignsScript() {
     const script = document.createElement('script');
     script.src = chrome.runtime.getURL('inject.js');
-    script.onload = function() {
+    script.onload = function () {
       console.log('WBin CAMP: inject.js загружен');
       this.remove();
     };
@@ -75,7 +75,7 @@ if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/list')) 
   injectCampaignsScript();
 
   // Слушаем сообщения от инжектированного скрипта (ответы v5 для кампаний)
-  window.addEventListener('message', function(event) {
+  window.addEventListener('message', function (event) {
     if (
       event.source === window &&
       event.data &&
@@ -214,5 +214,5 @@ if (window.location.href.includes('https://cmp.wildberries.ru/campaigns/list')) 
       }
     });
     mo.observe(document.documentElement, { childList: true, subtree: true });
-  } catch(_) {}
+  } catch (_) { }
 })();
