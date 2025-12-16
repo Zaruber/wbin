@@ -402,6 +402,37 @@ body {
     font-size: 13px;
 }
 
+/* Filters & Form Controls */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 2px;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border: 1px solid #d1d1d6;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: #fff;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
 /* Modal */
 .modal {
     display: none;
@@ -468,6 +499,10 @@ body {
     justify-content: flex-end;
     gap: 10px;
     background: #f9f9fb;
+}
+
+.modal.active {
+    display: block;
 }
 
 /* Tooltip Popover */

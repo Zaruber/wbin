@@ -150,11 +150,33 @@
         </div>
 
         <div id="view-storage" class="view-section" style="display: none;">
-          <div class="empty-state">
-            <div class="empty-icon">📦</div>
-            <h3>Платное хранение</h3>
-            <p>Раздел находится в разработке и скоро станет доступен.</p>
-          </div>
+          <section class="bulk-actions" style="justify-content: flex-start; align-items: flex-end;">
+            <div class="filter-group">
+              <label for="storageDateFrom" class="filter-label">С</label>
+              <input type="date" id="storageDateFrom" class="form-control">
+            </div>
+            <div class="filter-group">
+              <label for="storageDateTo" class="filter-label">По</label>
+              <input type="date" id="storageDateTo" class="form-control">
+            </div>
+            <button id="getStorageReport" class="btn primary">Получить отчет</button>
+            <div class="vr-separator"></div>
+            <div class="btn-group" id="storageActions" style="display: none;">
+              <button id="groupByArticle" class="btn">По артикулам</button>
+              <div class="vr-separator"></div>
+              <button id="downloadStorageXlsx" class="btn">Скачать Excel</button>
+              <button id="copyStorageTable" class="btn">Копировать</button>
+            </div>
+          </section>
+          <section>
+            <div class="table-container" style="max-height: calc(100vh - 180px);">
+              <div id="storageTableContainer" style="overflow: auto;">
+                <div class="empty-state" id="storageEmptyState" style="height: 300px;">
+                  <p>Выберите период и нажмите «Получить отчет»</p>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
 
       </main>

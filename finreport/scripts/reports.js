@@ -1526,4 +1526,265 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   });
+
+  initStorageView();
 });
+
+// --- Paid Storage Logic ---
+
+let currentStorageData = null;
+let currentStorageHeader = null;
+
+function initStorageView() {
+  const btn = document.getElementById('getStorageReport');
+  if (btn) {
+    btn.addEventListener('click', loadStorageReport);
+  }
+
+  const grpBtn = document.getElementById('groupByArticle');
+  if (grpBtn) {
+    grpBtn.addEventListener('click', showStorageSummaryByArticle);
+  }
+
+  // Set default dates (last 7 days)
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(today.getDate() - 7);
+
+  const fmt = d => d.toISOString().split('T')[0];
+  const dTo = document.getElementById('storageDateTo');
+  const dFrom = document.getElementById('storageDateFrom');
+
+  if (dTo && dFrom) {
+    dTo.value = fmt(today);
+    dFrom.value = fmt(weekAgo);
+  }
+}
+
+async function loadStorageReport() {
+  const dFrom = document.getElementById('storageDateFrom').value;
+  const dTo = document.getElementById('storageDateTo').value;
+
+  if (!dFrom || !dTo) {
+    alert('Выберите период');
+    return;
+  }
+
+  const container = document.getElementById('storageTableContainer');
+  const emptyState = document.getElementById('storageEmptyState');
+  const actions = document.getElementById('storageActions');
+
+  // Reset UI
+  container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--muted);">Загрузка отчета...</div>';
+  if (actions) actions.style.display = 'none';
+
+  const API_STORAGE = 'https://seller-weekly-report.wildberries.ru/ns/paidstorage/analytics-back/api/v1/excel-report-nomenclature';
+  const url = new URL(API_STORAGE);
+  url.searchParams.set('dateFrom', dFrom);
+  url.searchParams.set('dateTo', dTo);
+
+  const headers = {
+    'Accept': 'application/json'
+  };
+  if (authorizeV3Token) {
+    headers['AuthorizeV3'] = authorizeV3Token;
+  }
+
+  try {
+    const res = await fetchBlobFollowingJsonLink(url.toString(), headers);
+
+    if (!res || !res.blob) {
+      throw new Error('Не удалось получить файл отчета');
+    }
+
+    await renderStorageTable(res.blob);
+
+    const actions = document.getElementById('storageActions');
+    if (actions) {
+      actions.style.display = 'flex';
+
+      const copyBtn = document.getElementById('copyStorageTable');
+      copyBtn.onclick = () => copyTableElement(container.querySelector('table'));
+
+      const dlBtn = document.getElementById('downloadStorageXlsx');
+      dlBtn.onclick = () => {
+        const table = container.querySelector('table');
+        if (!table) return;
+        try {
+          const wb = XLSX.utils.table_to_book(table, { sheet: "Report" });
+          XLSX.writeFile(wb, `storage_report_${dFrom}_${dTo}.xlsx`);
+        } catch (e) {
+          console.error('Download failed', e);
+          alert('Ошибка при скачивании: ' + e.message);
+        }
+      };
+    }
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<div style="padding: 40px; text-align: center; color: #ff3b30;">Ошибка: ${err.message}</div>`;
+  }
+}
+
+async function renderStorageTable(blob) {
+  const container = document.getElementById('storageTableContainer');
+  try {
+    const buffer = await blob.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+
+    if (!workbook.SheetNames.length) {
+      throw new Error('Пустой файл Excel');
+    }
+
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="padding: 40px; text-align: center;">Нет данных за выбранный период</div>';
+      currentStorageData = null;
+      return;
+    }
+
+    currentStorageHeader = data[0];
+    currentStorageData = data.slice(1);
+
+    let html = '<table class="table" style="width:100%; border-collapse: collapse; font-size: 12px; white-space: nowrap;">';
+
+    // Header
+    html += '<thead><tr>';
+    data[0].forEach(cell => {
+      html += `<th style="position: sticky; top: 0; background: #f5f5f7; z-index: 10;">${cell}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    // Body
+    for (let i = 1; i < data.length; i++) {
+      html += '<tr>';
+      data[i].forEach(cell => {
+        let val = (cell !== undefined && cell !== null) ? cell : '';
+        // Fix decimal separator
+        if (typeof val === 'number') {
+          val = String(val).replace('.', ',');
+        } else if (typeof val === 'string' && /^-?\d+\.\d+$/.test(val)) {
+          val = val.replace('.', ',');
+        }
+        html += `<td>${val}</td>`;
+      });
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+
+    container.innerHTML = html;
+
+  } catch (e) {
+    throw new Error('Ошибка обработки Excel: ' + e.message);
+  }
+}
+
+function showStorageSummaryByArticle() {
+  if (!currentStorageData || !currentStorageHeader) {
+    alert('Нет данных для группировки');
+    return;
+  }
+
+  const header = currentStorageHeader;
+  // Find column indices
+  const idxArticle = header.findIndex(h => /Артикул\s*WB/i.test(h));
+  const idxCost = header.findIndex(h => /Сумма\s*хранения/i.test(h));
+
+  if (idxArticle === -1 || idxCost === -1) {
+    alert('Не найдены необходимые колонки (Артикул WB, Сумма хранения)');
+    return;
+  }
+
+  const map = new Map();
+
+  for (const row of currentStorageData) {
+    const art = row[idxArticle];
+    let cost = row[idxCost];
+
+    if (!art) continue;
+
+    // Parse cost
+    if (typeof cost === 'string') {
+      cost = parseFloat(cost.replace(',', '.').replace(/\s/g, ''));
+    }
+    if (!isFinite(cost)) cost = 0;
+
+    const current = map.get(art) || 0;
+    map.set(art, current + cost);
+  }
+
+  // Convert to sorted array
+  const sorted = Array.from(map.entries())
+    .map(([art, cost]) => ({ art, cost }))
+    .sort((a, b) => b.cost - a.cost);
+
+  // Build table HTML
+  let tableHtml = `
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Артикул WB</th>
+            <th>Сумма хранения, руб</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+  let total = 0;
+  for (const item of sorted) {
+    total += item.cost;
+    const costStr = item.cost.toFixed(2).replace('.', ',');
+    tableHtml += `
+            <tr>
+                <td>${item.art}</td>
+                <td>${costStr}</td>
+            </tr>
+        `;
+  }
+
+  // Total row
+  const totalStr = total.toFixed(2).replace('.', ',');
+  tableHtml += `
+        <tr style="font-weight: bold; background: #f5f5f7;">
+            <td>ИТОГО</td>
+            <td>${totalStr}</td>
+        </tr>
+    `;
+
+  tableHtml += '</tbody></table>';
+
+  // Show Modal
+  const modal = document.getElementById('reportModal');
+  const title = document.getElementById('modalTitle');
+  const body = document.getElementById('modalTableContainer');
+  const dlBtn = document.getElementById('downloadModalReport'); // Existing button
+
+  if (modal && title && body) {
+    title.innerText = 'Затраты по артикулам';
+    body.innerHTML = tableHtml;
+    modal.style.display = 'block'; // Use inline style to match existing close logic
+
+    // Ensure "Download" button uses correct filename for this summary
+    // We can temporarily attach a specific handler or just rely on generic table_to_book
+    // The existing download handler uses 'report_details.xlsx' or similar. 
+    // We might want to customize it but generic is fine for now.
+  }
+}
+
+
+function copyTableElement(table) {
+  if (!table) return;
+  let text = '';
+  for (const row of table.rows) {
+    const cells = Array.from(row.cells).map(c => c.innerText.replace(/(\r\n|\n|\r)/gm, " ").trim());
+    text += cells.join('\t') + '\n';
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Таблица скопирована в буфер обмена');
+  }).catch(err => {
+    console.error(err);
+    alert('Не удалось скопировать');
+  });
+}
