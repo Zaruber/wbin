@@ -1,8 +1,25 @@
 /* Reset and Base Styles */
+:root {
+    --bg-primary: #000000;
+    --bg-secondary: #1c1c1e;
+    --bg-tertiary: #2c2c2e;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(235, 235, 245, 0.6);
+    --text-tertiary: rgba(235, 235, 245, 0.3);
+    --separator: rgba(84, 84, 88, 0.48);
+    --accent: #0A84FF;
+    --card-bg: rgba(28, 28, 30, 0.6);
+    --card-bg-hover: rgba(44, 44, 46, 0.8);
+    --card-border: rgba(255, 255, 255, 0.08);
+    /* Subtle border for definition */
+    --sys-font: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Chrome Extension Popup Specific Styles */
@@ -13,23 +30,19 @@ body {
     max-width: 400px !important;
     min-height: 500px !important;
     max-height: 600px !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #1a1a1a;
-    color: #ffffff;
-    margin: 0;
-    padding: 0;
+    font-family: var(--sys-font);
+    background: var(--bg-primary);
+    color: var(--text-primary);
     overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    position: relative;
+    overflow-y: hidden;
+    /* Use main-content for scroll */
 }
 
 .app-container {
-    min-height: 500px;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: radial-gradient(circle at top right, #2a2a2c 0%, #000000 60%);
 }
 
 /* Header */
@@ -37,293 +50,281 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 24px 8px;
-    background: transparent;
+    padding: 18px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 0.5px solid var(--separator);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.header-left {
+.header-left .app-logo-compact {
     display: flex;
     align-items: center;
-}
-
-.app-logo-compact {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .logo-img {
-    height: 40px;
+    height: 32px;
+    /* Slightly smaller for elegance */
     width: auto;
-    object-fit: contain;
 }
 
 .version-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 20px;
-    padding: 0 6px;
-    font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    padding: 2px 8px;
+    font-family: "SF Mono", monospace;
     font-size: 10px;
-    font-weight: 500;
-    color: #94a3b8;
-    background: transparent;
-    border: 1px dashed #475569;
-    border-radius: 6px;
-    cursor: help;
-    user-select: none;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    /* Pill shape */
+    border: none;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .header-links {
     display: flex;
-    align-items: center;
     gap: 8px;
 }
 
 .header-link {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 50%;
+    /* Circular buttons */
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
     text-decoration: none;
-    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
 }
 
 .header-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    transform: scale(1.05);
 }
 
-.telegram-link:hover {
-    background: rgba(0, 136, 204, 0.2);
-    color: #0088cc;
-    border-color: rgba(0, 136, 204, 0.3);
-}
-
-.github-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.menu-dots {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.dot {
-    width: 4px;
-    height: 4px;
-    background: #ffffff;
-    border-radius: 50%;
-    opacity: 0.7;
-}
-
-.profile-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
+.header-link svg {
+    opacity: 0.8;
 }
 
 /* Main Content */
 .main-content {
     flex: 1;
-    padding: 16px 24px 24px;
+    padding: 20px;
     overflow-y: auto;
 }
 
+/* Typography for Section Headers (if added later) */
+.section-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    padding-left: 4px;
+}
 
 /* Features Section */
 .features-section {
-    margin-bottom: 24px;
-    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .feature-item {
     display: flex;
     align-items: center;
-    padding: 18px 20px;
-    margin-bottom: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    /* Apple-style rounded corners */
     cursor: pointer;
-    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0);
+    transition: background 0.3s;
+    z-index: 1;
 }
 
 .feature-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    background: var(--card-bg-hover);
+    transform: scale(1.02);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+.feature-item:active {
+    transform: scale(0.98);
+}
+
+/* Active State - subtle highlight usually preferred in Apple design over strong bg */
 .feature-item.active {
-    background: rgba(139, 92, 246, 0.15);
-    border-color: rgba(139, 92, 246, 0.4);
-    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
+    background: rgba(30, 30, 32, 0.9);
+    border-color: rgba(10, 132, 255, 0.3);
+    box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.2);
 }
 
 .feature-icon {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 16px;
-    background: rgba(255, 255, 255, 0.08);
+    font-size: 24px;
+    /* Glassmorphism for icons */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
+    z-index: 2;
 }
 
 .feature-item:hover .feature-icon {
-    transform: scale(1.05);
+    transform: scale(1.1);
 }
 
+/* Specific Icon Colors - Using gradients that pop on dark */
 .campaigns-icon {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
-    color: #22c55e;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+    color: #30d158;
+    background: linear-gradient(135deg, rgba(48, 209, 88, 0.15), rgba(48, 209, 88, 0.05));
+    box-shadow: inset 0 0 20px rgba(48, 209, 88, 0.05);
 }
 
 .statistics-icon {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
-    color: #3b82f6;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    color: #0a84ff;
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(10, 132, 255, 0.05));
+    box-shadow: inset 0 0 20px rgba(10, 132, 255, 0.05);
 }
 
 .ask-icon {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(168, 85, 247, 0.1) 100%);
-    color: #a855f7;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+    color: #bf5af2;
+    background: linear-gradient(135deg, rgba(191, 90, 242, 0.15), rgba(191, 90, 242, 0.05));
+    box-shadow: inset 0 0 20px rgba(191, 90, 242, 0.05);
 }
 
 .financial-icon {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
-    color: #10b981;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    color: #32d74b;
+    background: linear-gradient(135deg, rgba(50, 215, 75, 0.15), rgba(50, 215, 75, 0.05));
+    box-shadow: inset 0 0 20px rgba(50, 215, 75, 0.05);
 }
 
 .promotions-icon {
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0.1) 100%);
-    color: #f97316;
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+    color: #ff9f0a;
+    background: linear-gradient(135deg, rgba(255, 159, 10, 0.15), rgba(255, 159, 10, 0.05));
+    box-shadow: inset 0 0 20px rgba(255, 159, 10, 0.05);
 }
 
 .feature-info {
     flex: 1;
+    z-index: 2;
 }
 
 .feature-name {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
+    letter-spacing: -0.3px;
     margin-bottom: 2px;
+    color: var(--text-primary);
 }
 
 .feature-date {
-    font-size: 12px;
-    opacity: 0.6;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 400;
 }
 
-
-
-/* Scrollbar Styling */
+/* Scrollbar Styling - Minimalist */
 .main-content::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
 }
 
 .main-content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
+    background: transparent;
 }
 
 .main-content::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.5);
-    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
 }
 
 .main-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.7);
+    background: rgba(255, 255, 255, 0.3);
 }
 
-
-
-/* Responsive adjustments */
-@media (max-width: 400px) {
-
-    html,
-    body {
-        width: 400px !important;
-        min-width: 400px !important;
-    }
-
-    .main-content {
-        padding: 0 16px;
-    }
-
-    .header {
-        padding: 16px 20px 12px;
-    }
-
-    .bottom-nav {
-        padding: 12px 20px 16px;
-    }
-}
-
-/* Force popup dimensions */
-body {
-    display: block !important;
-    visibility: visible !important;
-}
-
-/* Ensure all content is visible */
-.app-container {
-    display: flex !important;
-    flex-direction: column !important;
-    min-height: 500px !important;
-}
-
-/* Loading states */
+/* Loading States */
 .loading {
-    opacity: 0.6;
+    opacity: 0.7;
     pointer-events: none;
 }
 
-/* Success states */
-.success {
-    background: rgba(34, 197, 94, 0.2) !important;
-    border-color: rgba(34, 197, 94, 0.3) !important;
+.loading .feature-name {
+    display: inline-block;
+    position: relative;
+    padding-right: 18px;
 }
 
+.loading .feature-name::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    margin-top: -6px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
 
-/* Error states */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success States */
+.success {
+    background: rgba(48, 209, 88, 0.15) !important;
+    border-color: rgba(48, 209, 88, 0.3) !important;
+}
+
+.success .feature-name {
+    color: #30d158;
+}
+
+/* Error States */
 .error {
-    background: rgba(239, 68, 68, 0.2) !important;
-    border-color: rgba(239, 68, 68, 0.3) !important;
+    background: rgba(255, 69, 58, 0.15) !important;
+    border-color: rgba(255, 69, 58, 0.3) !important;
+}
+
+.error .feature-name {
+    color: #ff453a;
 }
