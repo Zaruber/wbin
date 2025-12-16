@@ -1608,10 +1608,34 @@ async function loadStorageReport() {
 
       const dlBtn = document.getElementById('downloadStorageXlsx');
       dlBtn.onclick = () => {
-        const table = container.querySelector('table');
-        if (!table) return;
+        if (!currentStorageData || !currentStorageHeader) return;
+
         try {
-          const wb = XLSX.utils.table_to_book(table, { sheet: "Report" });
+          // Prepare data for Excel: header + rows
+          const excelData = [currentStorageHeader];
+
+          currentStorageData.forEach(row => {
+            const newRow = row.map(cell => {
+              // Ensure numbers are exported as numbers
+              if (typeof cell === 'number') {
+                return cell;
+              }
+              // Try parsing numeric strings
+              if (typeof cell === 'string') {
+                // Replace comma with dot for parsing if needed
+                const normalized = cell.replace(',', '.');
+                if (/^-?\d+(\.\d+)?$/.test(normalized)) {
+                  return parseFloat(normalized);
+                }
+              }
+              return cell;
+            });
+            excelData.push(newRow);
+          });
+
+          const ws = XLSX.utils.aoa_to_sheet(excelData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Report");
           XLSX.writeFile(wb, `storage_report_${dFrom}_${dTo}.xlsx`);
         } catch (e) {
           console.error('Download failed', e);
@@ -1766,10 +1790,42 @@ function showStorageSummaryByArticle() {
     body.innerHTML = tableHtml;
     modal.style.display = 'block'; // Use inline style to match existing close logic
 
+    // Customize download behavior for this specific modal content
+    if (dlBtn) {
+      // Remove old listeners by cloning (simple way)
+      const newDlBtn = dlBtn.cloneNode(true);
+      dlBtn.parentNode.replaceChild(newDlBtn, dlBtn);
+
+      newDlBtn.addEventListener('click', () => {
+        try {
+          // Determine headers
+          const headers = ['Артикул WB', 'Сумма хранения, руб'];
+          const excelData = [headers];
+
+          // Add rows
+          sorted.forEach(item => {
+            // Export as number, round to 2 decimals
+            const costVal = Math.round(item.cost * 100) / 100;
+            excelData.push([item.art, costVal]);
+          });
+
+          // Add total
+          const totalVal = Math.round(total * 100) / 100;
+          excelData.push(['ИТОГО', totalVal]);
+
+          const ws = XLSX.utils.aoa_to_sheet(excelData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Summary");
+          XLSX.writeFile(wb, 'storage_summary_by_article.xlsx');
+        } catch (e) {
+          console.error(e);
+          alert('Ошибка скачивания: ' + e.message);
+        }
+      });
+    }
+
+    // Also fix copy button context if needed, but existing copy usually grabs table text which is already formatted.
     // Ensure "Download" button uses correct filename for this summary
-    // We can temporarily attach a specific handler or just rely on generic table_to_book
-    // The existing download handler uses 'report_details.xlsx' or similar. 
-    // We might want to customize it but generic is fine for now.
   }
 }
 
