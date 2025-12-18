@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WBin",
-  "version": "1.5",
+  "version": "1.5.1",
   "description": "Скачивание данных, статистики, фин. отчетов с сайта Wildberries простым способом",
   "icons": {
     "16": "image/16.png",
